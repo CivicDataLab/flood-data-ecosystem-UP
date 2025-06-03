@@ -1,5 +1,5 @@
-# Flood Data Ecosystem - Odisha
-The repository contains codes to extract relevant datasets and the modelling approach used to calculate Risk Scores for Odisha.
+# Flood Data Ecosystem - Uttar Pradesh
+The repository contains codes to extract relevant datasets and the modelling approach used to calculate Risk Scores for Uttar Pradesh.
 
 
 
