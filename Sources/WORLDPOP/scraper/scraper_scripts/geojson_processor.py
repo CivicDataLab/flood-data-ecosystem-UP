@@ -41,7 +41,7 @@ def convert_multipolygon_to_polygon(feature):
     return geom
 
 
-def process_geojson(input_data, output_dir=r"D:\CDL\flood-data-ecosystem-UP\Sources\WORLDPOP\data copy\shapefiles\district_geojson"):
+def process_geojson(input_data, output_dir=r"/home/prajna/civicdatalab/ids-drr/up/flood-data-ecosystem-UP/Sources/WORLDPOP/data copy/shapefiles"):
     """
     Processes GeoJSON files:
     1. Convert MultiPolygon to Polygon
