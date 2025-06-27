@@ -16,7 +16,7 @@ year="2020"
 class WorldPopDataFetcher:
     def __init__(self, base_url="https://api.worldpop.org/v1"):
         self.base_url = base_url
-        self.output_dir = Path(r"D:\CDL\flood-data-ecosystem-UP\Sources\WORLDPOP\data\agesexstructure") / str(year)
+        self.output_dir = Path(r"/home/prajna/civicdatalab/ids-drr/up/flood-data-ecosystem-UP/Sources/WORLDPOP/data/agesexstructure") / str(year)
         self.output_dir.mkdir(exist_ok=True)
 
     def simplify_geometry(self, geojson, tolerance=0.1):
@@ -135,11 +135,11 @@ class WorldPopDataFetcher:
 def main():
     fetcher = WorldPopDataFetcher()
     geojson_dir = Path(
-        r"D:\CDL\flood-data-ecosystem-UP\Sources\WORLDPOP\data copy\shapefiles\district_geojson")
+        r"/home/prajna/civicdatalab/ids-drr/up/flood-data-ecosystem-UP/Sources/WORLDPOP/data/test")
 
     for geojson_file in geojson_dir.glob("*.geojson"):
         logger.info(f"Processing {geojson_file.name}")
-        fetcher.fetch_worldpop_data(str(geojson_file))
+        fetcher.fetch_worldpop_data(str(geojson_file),year=2020)
 
 
 if __name__ == "__main__":
