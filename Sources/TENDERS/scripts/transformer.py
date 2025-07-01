@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import geopandas as gpd
 
-data_path = os.getcwd()+'/flood-data-ecosystem-Odisha/Sources/TENDERS/data/'
+data_path = os.getcwd()+'/flood-data-ecosystem-UP/Sources/TENDERS/data/'
 od_gdf = gpd.read_file(os.getcwd()+r'\flood-data-ecosystem-Odisha\Maps\od_ids-drr_shapefiles\odisha_block_final.geojson')
 
 flood_tenders_geotagged_df = pd.read_csv(data_path + 'floodtenders_blockgeotagged.csv')
