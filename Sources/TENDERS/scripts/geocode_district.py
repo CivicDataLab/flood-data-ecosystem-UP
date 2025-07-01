@@ -253,7 +253,7 @@ for idx, row in tenders_df.iterrows():
     
     tenders_df.loc[idx,'DISTRICT_FINALISED'] = DISTRICT_SELECTED
 
-tenders_df.to_csv(os.getcwd()+'/flood-data-ecosystem-Odisha/Sources/TENDERS/data/floodtenders_districtgeotagged.csv',index=False)
+tenders_df.to_csv(os.getcwd()+'/flood-data-ecosystem-UP/Sources/TENDERS/data/floodtenders_districtgeotagged.csv',index=False)
 
 print('Total number of flood related tenders: ', tenders_df.shape[0])
 print('Number of tenders whose district could not be geo-tagged: ',tenders_df[tenders_df['DISTRICT_FINALISED']=='NA'].shape[0])
