@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 import glob
 
-main_directory = Path.cwd() / r'/home/prajna/civicdatalab/ids-drr/up/flood-data-ecosystem-UP/Sources/'
+main_directory = Path.cwd() / r'Sources'
 print(main_directory)
 
 
@@ -18,20 +18,16 @@ for root, dirs, files in os.walk(main_directory):
         dfs = []
         for csv in csv_files:
             #csv = csv.resolve()
-            if any(folder in str(csv.parts) for folder in [ 'ANTYODAYA','EXPERIMENTAL', 'IMD', 'TENDERS']):
+                #one-time
+            if any(folder in str(csv.parts) for folder in ['BHARATMAPS', 'GCN250', 'NASADEM', 'NERDRR', 'ANTYODAYA']):
                 timeperiod = ''
                 file_name = csv.stem
-            elif any(folder in str(csv.parts) for folder in ['WORLDPOP']):#, 'WRIS']):
+                # Annual 
+            elif any(folder in str(csv.parts) for folder in ['WORLDPOP', 'WRIS']):
                 year_match = re.findall(r'\d{4}', csv.name)
-                if year_match:
-                    timeperiod = year_match[0]
-                    file_name = csv.stem[:-5]
-                
-            elif any("SENTINEL" in str(parent) for parent in csv.parents):
-                date_match = re.findall(r'\d{4}-\d{2}-\d{2}', csv.name)
-                if date_match:
-                    timeperiod = date_match[0][:-3].replace('-', '_')
-                    file_name = csv.stem
+                #if year_match:
+                timeperiod = year_match[0]
+                file_name = csv.stem[:-5]
                 
             else:
                 date_match = re.findall(r'\d{4}_\d{2}', csv.name)
@@ -51,6 +47,7 @@ for root, dirs, files in os.walk(main_directory):
 # IMD
 path = main_directory / 'IMD/data/rain/csv'
 csvs = glob.glob(str(path / '*.csv'))
+print(path)
 dfs = []
 for csv in csvs:
     month = re.findall(r'\d{4}_\d{2}', csv)[0]
@@ -85,5 +82,5 @@ master_df.to_csv(main_directory / 'master/rainfall.csv', index=False)
 #     df['timeperiod'] = month
 #     dfs.append(df)
 
-master_df = pd.concat(dfs)
-master_df.to_csv(main_directory / 'master/runoff.csv', index=False)
+#master_df = pd.concat(dfs)
+#master_df.to_csv(main_directory / 'master/runoff.csv', index=False)

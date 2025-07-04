@@ -6,8 +6,8 @@ import geopandas as gpd
 import warnings
 warnings.filterwarnings("ignore")
 
-variables_data_path = os.getcwd() + r'/flood-data-ecosystem-UP/Sources/master/'
-od_sd = gpd.read_file(r'/home/prajna/civicdatalab/ids-drr/up/flood-data-ecosystem-UP/Maps/up_ids-drr_shapefiles/UP_Subdistrict_final_modified.geojson')
+variables_data_path = os.getcwd() + r'/Sources/master/'
+od_sd = gpd.read_file(r'Maps/up_ids-drr_shapefiles/UP_Subdistrict_final_modified.geojson')
 
 date_range = pd.date_range(start="2021-04-01", end="2025-05-01", freq='MS')
 
@@ -17,8 +17,8 @@ formatted_dates = [date.strftime('%Y_%m') for date in date_range]
 # Create a Pandas DataFrame with the values
 dfs = []
 for year_month in formatted_dates:
-    df = od_sd[['block_name', 'object_id','block_area','dtname']]
-    df.columns = ['block_name', 'object_id', 'block_area','district']
+    df = od_sd[['sdtname', 'object_id','st_area(shape)','dtname']]
+    df.columns = ['sdtname', 'object_id', 'st_area(shape)','district']
     df['timeperiod'] = year_month
     dfs.append(df)
 master_df = pd.concat(dfs).reset_index(drop = True)
@@ -29,19 +29,19 @@ print(master_df)
 monthly_variables = ['total_tender_awarded_value',
                      #'SOPD_tenders_awarded_value', 
                      #'SDRF_tenders_awarded_value', 
-                     'RIDF_tenders_awarded_value', #'LTIF_tenders_awarded_value', 'CIDF_tenders_awarded_value',
-                      'Preparedness Measures_tenders_awarded_value', 
-                      'Immediate Measures_tenders_awarded_value', 
-                      'Others_tenders_awarded_value',
+                     #'RIDF_tenders_awarded_value', #'LTIF_tenders_awarded_value', 'CIDF_tenders_awarded_value',
+                      #'Preparedness Measures_tenders_awarded_value', 
+                      #'Immediate Measures_tenders_awarded_value', 
+                      #'Others_tenders_awarded_value',
                       #'Total_Animal_Washed_Away', 'Total_Animal_Affected',
                       #'Population_affected_Total', 'Crop_Area',
                       #'Male_Camp', 'Female_Camp', 'Children_Camp',
                      #'Total_House_Fully_Damaged',
                      #'Human_Live_Lost_Children', 'Human_Live_Lost_Female', 'Human_Live_Lost_Male',
                      #'Embankments affected', 'Roads', 'Bridge', 'Embankment breached',
-                     'rainfall','runoff',
+                     'rainfall',#'runoff',
                      #'ndvi_subdis', 'ndbi_subdis',
-                     'inundation', #'riverlevel'
+                     #'inundation', #'riverlevel'
                      ]
 
 for variable in monthly_variables:
@@ -69,7 +69,8 @@ master_df = master_df.drop(['Male_Camp', 'Female_Camp', 'Children_Camp',
 '''
 #Annual variables
 master_df['year'] = master_df['timeperiod'].str[:4].astype(int)
-annual_variables = ['mean_sex_ratio', 'sum_aged_population', 'sum_young_population', 'sum_population']#,
+annual_variables = [#'mean_sex_ratio', 'sum_aged_population', 'sum_young_population', 
+                    'sum_population']#,
                     #'final_lu']
 
 for variable in annual_variables:
@@ -85,16 +86,17 @@ print(zero_counts)
 print(master_df.columns)
 
 # one-time variables
-onetime_variables = ['Schools', 'RailLengths', 'RoadLengths','HealthCenters',#'gcn250_average', 
-                     'slope_elevation',
-                      'antyodaya_variables', 'drainage_density','distance_from_river','distance_from_sea']
-                     #'distance_from_river_polygon',]
+onetime_variables = [#'Schools', 'RailLengths', 'RoadLengths','HealthCenters',#'gcn250_average', 
+                     #'slope_elevation',
+                      'antyodaya_variables'#, 'drainage_density','distance_from_river','distance_from_sea']
+                     #'distance_from_river_polygon',
+                     ]
 master_df['year'] = ''
 
 for variable in onetime_variables:
     print(variable)
     variable_df = pd.read_csv(variables_data_path + variable + '.csv')
-    #columns_to_drop = [col for col in ['timeperiod', 'dtname','block_area','district'] if col in variable_df.columns]
+    #columns_to_drop = [col for col in ['timeperiod', 'dtname','st_area(shape)','district'] if col in variable_df.columns]
     #if columns_to_drop:
     #    variable_df = variable_df.drop(columns=columns_to_drop)
     variable_df['year'] = ''
@@ -120,17 +122,17 @@ master_df['max_rain'] = master_df['max_rain'].fillna(master_df.groupby(['object_
 master_df['mean_rain'] = master_df['mean_rain'].fillna(master_df.groupby(['object_id'])['mean_rain'].transform('mean'))
 master_df['sum_rain'] = master_df['sum_rain'].fillna(master_df.groupby(['object_id'])['sum_rain'].transform('mean'))
 
-master_df['Sum_Runoff'] = master_df['Sum_Runoff'].fillna(master_df.groupby(['object_id'])['Sum_Runoff'].transform('mean'))
-master_df['Peak_Runoff'] = master_df['Peak_Runoff'].fillna(master_df.groupby(['object_id'])['Peak_Runoff'].transform('mean'))
-master_df['Mean_Daily_Runoff'] = master_df['Mean_Daily_Runoff'].fillna(master_df.groupby(['object_id'])['Mean_Daily_Runoff'].transform('mean'))
+#master_df['Sum_Runoff'] = master_df['Sum_Runoff'].fillna(master_df.groupby(['object_id'])['Sum_Runoff'].transform('mean'))
+#master_df['Peak_Runoff'] = master_df['Peak_Runoff'].fillna(master_df.groupby(['object_id'])['Peak_Runoff'].transform('mean'))
+#master_df['Mean_Daily_Runoff'] = master_df['Mean_Daily_Runoff'].fillna(master_df.groupby(['object_id'])['Mean_Daily_Runoff'].transform('mean'))
 
 
 # Impute missing ANTYODAYA vars
-master_df['block_nosanitation_hhds_pct'] = master_df['block_nosanitation_hhds_pct'].fillna(master_df.groupby(['district'])['block_nosanitation_hhds_pct'].transform('mean'))
-master_df['block_piped_hhds_pct'] = master_df['block_piped_hhds_pct'].fillna(master_df.groupby(['district'])['block_piped_hhds_pct'].transform('mean'))
+master_df['sd_nosanitation_hhds_pct'] = master_df['sd_nosanitation_hhds_pct'].fillna(master_df.groupby(['district'])['sd_nosanitation_hhds_pct'].transform('mean'))
+master_df['sd_piped_hhds_pct'] = master_df['sd_piped_hhds_pct'].fillna(master_df.groupby(['district'])['sd_piped_hhds_pct'].transform('mean'))
 master_df['avg_tele'] = master_df['avg_tele'].fillna(master_df.groupby(['district'])['avg_tele'].transform('median')) #median
 master_df['avg_electricity'] = master_df['avg_electricity'].fillna(master_df.groupby(['district'])['avg_electricity'].transform('mean'))
-master_df['net_sown_area_in_hac'] = master_df['net_sown_area_in_hac'].fillna(master_df.groupby(['district'])['net_sown_area_in_hac'].transform('mean'))
+#master_df['net_sown_area_in_hac'] = master_df['net_sown_area_in_hac'].fillna(master_df.groupby(['district'])['net_sown_area_in_hac'].transform('mean'))
 '''
 # Impute missing NDVI and NDBI
 master_df = master_df.sort_values(by=['object_id', 'timeperiod'])
@@ -143,7 +145,7 @@ master_df = master_df.fillna(0)
 # Drop columns with suffixes "_x" and "_y"
 master_df = master_df.loc[:, ~master_df.columns.str.endswith('_x') & ~master_df.columns.str.endswith('_y')]
 
-master_df.to_csv(os.getcwd() + '/data/MASTER_VARIABLES.csv', index=False)
+master_df.to_csv(os.getcwd() + '/MASTER_VARIABLES.csv', index=False)
 #master_df[master_df.duplicated(subset= ['object_id', 'timeperiod'])].to_csv('MASTER_VARIABLES.csv', index=False)
 
 print(master_df.shape)

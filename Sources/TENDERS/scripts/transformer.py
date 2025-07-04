@@ -2,13 +2,13 @@ import pandas as pd
 import os
 import geopandas as gpd
 
-data_path = os.getcwd()+'/flood-data-ecosystem-UP/Sources/TENDERS/data/'
-od_gdf = gpd.read_file(os.getcwd()+r'\flood-data-ecosystem-Odisha\Maps\od_ids-drr_shapefiles\odisha_block_final.geojson')
+data_path = os.getcwd()+'/Sources/TENDERS/data/'
+od_gdf = gpd.read_file(os.getcwd()+r'/Maps/up_ids-drr_shapefiles/UP_Subdistrict_final_modified.geojson')
 
-flood_tenders_geotagged_df = pd.read_csv(data_path + 'floodtenders_blockgeotagged.csv')
+flood_tenders_geotagged_df = pd.read_csv(data_path + 'floodtenders_subdistrictgeotagged.csv')
 flood_tenders_geotagged_df = flood_tenders_geotagged_df.merge(od_gdf,
                                  left_on = ['DISTRICT_FINALISED', 'BLOCK_FINALISED'],
-                                 right_on = ['dtname', 'block_name'],
+                                 right_on = ['dtname', 'sdtname'],
                                  how='left')
 #print(flood_tenders_geotagged_df.columns)
 flood_tenders_geotagged_df.rename(columns={'Awarded Price in ₹':'Awarded Value'},inplace = True)
