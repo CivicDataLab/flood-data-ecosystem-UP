@@ -1,5 +1,5 @@
 # Tenders
-Public procurement datasets are scraped from the [Odisha Tenders](https://etender.up.nic.in/) website. Flood tenders are identified and geotagged with revenue circles using the names of Subdistrict, revenue circles etc., present in tender work descriptions, Refrence IDs etc.
+Public procurement datasets are scraped from the [Uttar Pradesh Tenders](https://etender.up.nic.in/) website. Flood tenders are identified and geotagged with revenue circles using the names of Subdistrict, revenue circles etc., present in tender work descriptions, Refrence IDs etc.
 
 **Variables extracted from the source:** Count and Sum of Tenders, with various sub types.
 1. `total-tender-awarded-value`: Total value of flood related tenders
