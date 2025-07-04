@@ -144,8 +144,8 @@ master_df['mean_ndbi'] = master_df['mean_ndbi'].ffill()
 master_df = master_df.fillna(0)
 # Drop columns with suffixes "_x" and "_y"
 master_df = master_df.loc[:, ~master_df.columns.str.endswith('_x') & ~master_df.columns.str.endswith('_y')]
+master_df = master_df.drop_duplicates(subset=['object_id','timeperiod'])
 
 master_df.to_csv(os.getcwd() + '/MASTER_VARIABLES.csv', index=False)
-#master_df[master_df.duplicated(subset= ['object_id', 'timeperiod'])].to_csv('MASTER_VARIABLES.csv', index=False)
 
 print(master_df.shape)
