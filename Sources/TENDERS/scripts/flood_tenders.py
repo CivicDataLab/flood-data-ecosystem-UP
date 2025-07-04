@@ -5,8 +5,8 @@ import dateutil.parser
 import glob
 
 # input_df - after the scraper code is run
-data_path = os.getcwd() + r'/flood-data-ecosystem-UP/Sources/TENDERS/data/monthly_tenders/'
-
+data_path = os.getcwd() + r'/Sources/TENDERS/data/monthly_tenders/'
+print("Data path: ", data_path)
 # Identify flood related tenders using keywords
 def populate_keyword_dict(keyword_list): 
     keywords_dict = {}
@@ -44,7 +44,7 @@ csvs = glob.glob(data_path+'*.csv')
 
 for csv in csvs:
     filename  = re.split(r'/',csv)[-1]
-    filename  = re.split(r'\\',csv)[-1]
+    #filename  = re.split(r'\\',csv)[-1]
     print ("FILENAME"+ filename)
     input_df = pd.read_csv(csv)
     
@@ -196,19 +196,21 @@ for csv in csvs:
         elif response_type == "Preparedness Measures":
             sub_head_dict = {k: v for k, v in preparedness_measures_dict.items() if v is not False}
             tenders_df.loc[index, "Flood Response - Subhead"] = str(sub_head_dict)  
-
-    tenders_df.to_csv(os.getcwd()+r'/flood-data-ecosystem-UP/Sources/TENDERS/data/flood_tenders/'+filename,
+    print(os.getcwd()+'/'+filename)
+    tenders_df.to_csv(os.getcwd()+'/Sources/TENDERS/data/flood_tenders/'+filename,
                             encoding='utf-8',
                             index=False)
                             
     
 # Add explanation for this piece of code
-data_path = os.getcwd() + r'/flood-data-ecosystem-UP/Sources/TENDERS/data/'
+data_path = os.getcwd() + r'/Sources/TENDERS/data/'
 csvs = glob.glob(data_path+r'/flood_tenders/*.csv')
+print("Found flood files:", csvs)
+
 dfs=[]
 for csv in csvs:
-    csv = csv.replace("//", "/")
-    csv = csv.replace("\\", "/")
+    #csv = csv.replace("//", "/")
+    #csv = csv.replace("\\", "/")
     month = csv.split(r'/')[-1][:7]
     df = pd.read_csv(csv)
     df['month'] = month
