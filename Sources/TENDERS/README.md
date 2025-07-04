@@ -13,7 +13,7 @@ Public procurement datasets are scraped from the [Uttar Pradesh Tenders](https:/
 - `scripts` : Contains the scripts used to obtain the data
     - `flood_tenders.py`: Identification of flood tenders
     - `geocode_district.py`: Python script to Geocode the tenders at the district-level using keyword matching
-    - `geocode_blocks.py`: Python script to Geocode the tenders at the block level using keyword matching against Indian Village shapefile
+    - `geocode_subdistrict.py`: Python script to Geocode the tenders at the block level using keyword matching against Indian Village shapefile
 - `data`: Contains datasets generated using the scripts
     - `monthly_tenders`: Contains all the AOC tenders scraped from the tender website, organized by month and concatenated into a single file per month.
     - `flood_tenders`: Contains a subset of the "monthly_tenders", that have been identified to be used for flood response using pattern matching algorithms
