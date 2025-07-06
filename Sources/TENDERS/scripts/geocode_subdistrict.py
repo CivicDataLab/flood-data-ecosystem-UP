@@ -28,7 +28,7 @@ for FOCUS_DISTRICT in tqdm(UP_VILLAGES.dtname.unique()):
             #if row["vilnam_soi"] in VILLAGE_CORRECTION_DICT:
             #    row["vilnam_soi"] = VILLAGE_CORRECTION_DICT[row["vilnam_soi"]]
 
-            FOCUSDIST_village_dict[row["vilnam_soi"]] = {"village_id" : row["objectid"],
+            FOCUSDIST_village_dict[row["vilnam_soi"]] = {"village_id" : row["object_id"],
                                                      "block_name" : row["block_name"],
                                                      "block" : row["block_name"],
                                                      "gp_name": row["gp_name"],

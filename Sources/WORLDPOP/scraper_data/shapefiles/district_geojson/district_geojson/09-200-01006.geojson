@@ -4,7 +4,7 @@
     {
       "type": "Feature",
       "properties": {
-        "objectid": "09-200-01006",
+        "object_id": "09-200-01006",
         "stcode11": "09",
         "dtcode11": "200",
         "sdtcode11": "01006",

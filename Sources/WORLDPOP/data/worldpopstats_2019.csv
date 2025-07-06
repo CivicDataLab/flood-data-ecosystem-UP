@@ -1,4 +1,4 @@
-objectid,stcode11,dtcode11,sdtcode11,stname,dtname,sdtname,st_area_sh,st_length_,remarks,dist_lgd,state_lgd,subdt_lgd,ac_no,st_length(shape),st_area(shape),sum_population
+object_id,stcode11,dtcode11,sdtcode11,stname,dtname,sdtname,st_area_sh,st_length_,remarks,dist_lgd,state_lgd,subdt_lgd,ac_no,st_length(shape),st_area(shape),sum_population
 09-168-00865,09,168,00865,UTTAR PRADESH,Hamirpur,Rath,0.0,0.0,,149,9,865,229,205155.79393829318,913234181.4374133,276102.25
 09-200-01005,09,200,01005,UTTAR PRADESH,Sonbhadra,Robertsganj,0.0,0.0,,184,9,1005,401,445254.9469209083,4053318549.476354,1123557.5
 09-177-00902,09,177,00902,UTTAR PRADESH,Ayodhya,Rudauli,0.0,0.0,,140,9,902,271,209118.57344945197,729430687.4382885,543461.5625

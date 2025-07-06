@@ -17,7 +17,7 @@ DATA_FOLDER = os.path.abspath(CURRENT_FOLDER + "/../" + "data")
 TIFF_DATA_FOLDER = os.path.join(DATA_FOLDER, "rain", "tiff")
 CSV_DATA_FOLDER = os.path.join(DATA_FOLDER, "rain", "csv")
 
-ADMIN_BDRY_GDF = gpd.read_file(path + "<administrative_boundary_shapefile_path>")
+ADMIN_BDRY_GDF = gpd.read_file(path + r"/Maps\up_ids-drr_shapefiles\UP_subdistrict_final_4326.geojson")
 
 
 def download_data(year: int, start_date: str, end_date: str):
@@ -153,9 +153,9 @@ def parse_and_format_data(year: int, start_date: str, end_date: str):
     return None
 
 
-def retrieve_assam_revenue_circle_data(year: int):
+def retrieve_subdistrict_data(year: int):
     """
-    Retrives assam revenue circle data from the year wise .tif file
+    Retrives subdistrict data from the year wise .tif file
     """
     for month in [
         "01",
@@ -176,7 +176,7 @@ def retrieve_assam_revenue_circle_data(year: int):
             raster = rasterio.open(
                 os.path.join(
                     TIFF_DATA_FOLDER,
-                    "{}_resampled2.tif".format(month_and_year_filename),
+                    "{}_resampled.tif".format(month_and_year_filename),
                 )
             )
             print(f"Processing for {month_and_year_filename}")
@@ -197,8 +197,8 @@ def retrieve_assam_revenue_circle_data(year: int):
 
         dfs = []
 
-        for revenue_circle in mean_dicts:
-            dfs.append(pd.DataFrame([revenue_circle["properties"]]))
+        for subdistrict in mean_dicts:
+            dfs.append(pd.DataFrame([subdistrict["properties"]]))
 
         zonal_stats_df = pd.concat(dfs).reset_index(drop=True)
 
@@ -218,9 +218,9 @@ if __name__ == "__main__":
     year = int(year)
 
     # IF the year is current year, specify start and end date
-    start_date = "2024-01-01"
-    end_date = "2024-06-30"
+    start_date = "2025-01-01"
+    end_date = "2025-06-30"
 
     download_data(year, start_date=start_date, end_date=end_date)
     parse_and_format_data(year, start_date=start_date, end_date=end_date)
-    retrieve_assam_revenue_circle_data(year)
+    retrieve_subdistrict_data(year)

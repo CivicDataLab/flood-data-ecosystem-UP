@@ -82,7 +82,7 @@ def process_geojson(input_data, output_dir=r"/home/prajna/civicdatalab/ids-drr/u
         }
 
         # Create safe filename from district name
-        district_name = feature['properties']['objectid']
+        district_name = feature['properties']['object_id']
         safe_filename = "".join(x for x in district_name if x.isalnum() or x in [
                                 ' ', '_','-']).replace(' ', '_')
 
