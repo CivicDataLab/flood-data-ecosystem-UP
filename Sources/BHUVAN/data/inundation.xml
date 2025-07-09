@@ -1,0 +1,23 @@
+<GDAL_WMS>
+  <Service name="WMS">
+    <Version>1.1.1</Version>
+    <ServerUrl>https://bhuvan-gp1.nrsc.gov.in/bhuvan/wms?&amp;SERVICE=WMS</ServerUrl>
+    <Layers>flood%3Aup_2023_16_08_18</Layers>
+    <SRS>EPSG%3A4326</SRS>
+    <ImageFormat>image%2Fpng</ImageFormat>
+    <Transparent>TRUE</Transparent>
+    <BBoxOrder>xyXY</BBoxOrder>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>77.08</UpperLeftX>
+    <UpperLeftY>30.40</UpperLeftY>
+    <LowerRightX>84.63</LowerRightX>
+    <LowerRightY>23.87</LowerRightY>
+    <SizeX>1073741824</SizeX>
+    <SizeY>928680014</SizeY>
+  </DataWindow>
+  <BandsCount>4</BandsCount>
+  <BlockSizeX>1024</BlockSizeX>
+  <BlockSizeY>1024</BlockSizeY>
+  <OverviewCount>20</OverviewCount>
+</GDAL_WMS>
