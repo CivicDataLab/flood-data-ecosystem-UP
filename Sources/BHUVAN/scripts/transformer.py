@@ -15,12 +15,12 @@ else:
     print(sys.argv)
     year = str(sys.argv[1])
     month = str(sys.argv[2])
-    # print("Month: ", year + month)
+    print("Month: ", year + month)
 
 tic = time.perf_counter()
 path = os.getcwd() + "/Sources/BHUVAN/"
 assam_rc_gdf = gpd.read_file(
-    os.getcwd() + "/Maps/Assam_Revenue_Circles/assam_revenue_circle_nov2022.shp"
+    os.getcwd() + "/Maps/up_ids-drr_shapefiles/UP_subdistrict_final_4326.geojson"
 )
 
 files1 = glob.glob(
@@ -33,11 +33,13 @@ files = files1 + files2
 print("Number of maps available for the month: ", len(files))
 
 raster = rasterio.open(files[0])
-raster_array = raster.read(1)
+raster_array = raster.read(1).astype(np.int16)
 
-
+# accumulate    
 for file in files[1:]:
-    raster_array = raster_array + rasterio.open(file).read(1)
+    arr = rasterio.open(file).read(1).astype(np.int16)
+    raster_array += arr
+    #raster_array = raster_array + rasterio.open(file).read(1)
 
 # SAVE THE STITCHED RASTER FOR THE MONTH
 meta = raster.meta
@@ -47,6 +49,25 @@ meta["dtype"] = "int8"
 meta["crs"] = raster.crs
 meta["transform"] = raster.transform
 meta["nodata"] = -1
+
+meta = raster.meta.copy()
+meta.update({
+    "compress":   "deflate",
+    "count":      1,
+    "dtype":      "int16",
+    "nodata":     -1,      # or whatever sentinel you choose
+})
+with rasterio.open(
+    path + f"data/tiffs/stitched_monthly/stitched_{year}_{month}.tif",
+    "w", **meta
+) as dst:
+    dst.write(raster_array, 1)
+
+#with rasterio.open(
+#    path + f"data/tiffs/stitched_monthly/stitched_{year}_{month}.tif",
+#    "w", **meta
+#) as dst:
+#    dst.write(raster_array, 1)
 
 with rasterio.open(
     path + "data/tiffs/stitched_monthly/stitched_{}_{}.tif".format(year, month),
