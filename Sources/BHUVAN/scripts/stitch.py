@@ -7,7 +7,7 @@ PIL.Image.MAX_IMAGE_PIXELS = 933120000
 extension = 'png'
         #os.chdir(path)
 
-for year in ['2021']:
+for year in ['2024']:
     result = glob.glob(year+'_*.{}'.format(extension))
     k = np.empty(shape=(24320, 36864), dtype='uint8')
     for file in result:
