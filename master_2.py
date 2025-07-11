@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 variables_data_path = os.getcwd() + r'/Sources/master/'
-od_sd = gpd.read_file(r'Maps\up_ids-drr_shapefiles\UP_subdistrict_final_4326.geojson')
+up_sd = gpd.read_file(r'Maps/up_ids-drr_shapefiles/UP_subdistrict_final_4326.geojson')
 
 date_range = pd.date_range(start="2021-04-01", end="2025-06-30", freq='MS')
 
@@ -17,7 +17,7 @@ formatted_dates = [date.strftime('%Y_%m') for date in date_range]
 # Create a Pandas DataFrame with the values
 dfs = []
 for year_month in formatted_dates:
-    df = od_sd[['sdtname', 'object_id','st_area(shape)','dtname']]
+    df = up_sd[['sdtname', 'object_id','st_area(shape)','dtname']]
     df.columns = ['sdtname', 'object_id', 'st_area(shape)','district']
     df['timeperiod'] = year_month
     dfs.append(df)
@@ -41,7 +41,7 @@ monthly_variables = ['total_tender_awarded_value',
                      #'Embankments affected', 'Roads', 'Bridge', 'Embankment breached',
                      'rainfall',#'runoff',
                      #'ndvi_subdis', 'ndbi_subdis',
-                     #'inundation', #'riverlevel'
+                     'inundation', #'riverlevel'
                      ]
 
 for variable in monthly_variables:

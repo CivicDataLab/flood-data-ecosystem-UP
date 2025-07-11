@@ -60,14 +60,14 @@ master_df = master_df.rename(columns={'max': 'max_rain', 'mean':'mean_rain', 'su
 master_df.to_csv(main_directory / 'master/rainfall.csv', index=False)
 
 # BHUVAN
-# path = main_directory / 'BHUVAN/data/variables/inundation_pct'
-# csvs = glob.glob(str(path / '*.csv'))
-# dfs = []
-# for csv in csvs:
-#     month = re.findall(r'\d{4}_\d{2}', csv)[0]
-#     df = pd.read_csv(csv)
-#     df['timeperiod'] = month
-#     dfs.append(df)
+path = main_directory / 'BHUVAN/data/variables/inundation_pct'
+csvs = glob.glob(str(path / '*.csv'))
+dfs = []
+for csv in csvs:
+    month = re.findall(r'\d{4}_\d{2}', csv)[0]
+    df = pd.read_csv(csv)
+    df['timeperiod'] = month
+    dfs.append(df)
 
 # master_df = pd.concat(dfs)
 # master_df.to_csv(main_directory / 'master/inundation.csv', index=False)
