@@ -7,8 +7,9 @@ import warnings
 warnings.filterwarnings("ignore")
 
 UP_VILLAGES = pd.read_csv(os.getcwd()+r'/Maps/up_ids-drr_shapefiles/UP_VILLAGES_MASTER.csv', encoding='utf-8').dropna()
-UP_BLOCKS = gpd.read_file(os.getcwd()+r'/Maps/up_ids-drr_shapefiles/UP_Subdistrict_final_modified.geojson', driver='GeoJSON')
-
+UP_BLOCKS = gpd.read_file(os.getcwd()+r'/Maps\up_ids-drr_shapefiles\UP_subdistrict_final_4326.geojson', driver='GeoJSON')
+UP_VILLAGES['object_id'] = UP_VILLAGES['stcode11'].astype(str) + '-' +UP_VILLAGES['dtcode11'].astype(str) + '-' + UP_VILLAGES['sdtcode11'].astype(str)
+#print(UP_VILLAGES['object_id'])
 #BLOCK_HQs = list(UP_BLOCKS[UP_BLOCKS.HQ=='y']['revenue_ci'])
 
 tenders_df  = pd.read_csv(os.getcwd()+r'/Sources/TENDERS/data/floodtenders_districtgeotagged.csv', keep_default_na=False)
@@ -28,7 +29,7 @@ for FOCUS_DISTRICT in tqdm(UP_VILLAGES.dtname.unique()):
             #if row["vilnam_soi"] in VILLAGE_CORRECTION_DICT:
             #    row["vilnam_soi"] = VILLAGE_CORRECTION_DICT[row["vilnam_soi"]]
 
-            FOCUSDIST_village_dict[row["vilnam_soi"]] = {"village_id" : row["object_id"],
+            FOCUSDIST_village_dict[row["vilnam_soi"]] = {"village_id" : row["vilcode11"],
                                                      "block_name" : row["block_name"],
                                                      "block" : row["block_name"],
                                                      "gp_name": row["gp_name"],

@@ -17,25 +17,6 @@ village_duplicates_df = OD_VILLAGES[od_villages.isin(od_villages[od_villages.dup
 #village_duplicates_df = HP_VILLAGES[HP_VILLAGES.isin(HP_VILLAGES[HP_VILLAGES.duplicated()])].sort_values(by="VILNAM_SOI")
 
 
-'''
-VILLAGE_CORRECTION_DICT = {
-    "SOKARBILA(BOLGARBARI)(DARIAPAR" : "SOKARBILA(BOLGARBARI)(DARIAPAR)",
-    "MANGALDAI EXTENDED TOWN (BHEBA" : "MANGALDAI EXTENDED TOWN (BHEBA)",
-    "UPPER DIHING R.F. (SOUTH BLOCK" : "UPPER DIHING R.F. (SOUTH BLOCK)",
-    "KACHARI MAITHCHAGAON NO.1(BAR" : "KACHARI MAITHCHAGAON NO.1(BAR)",
-}
-
-
-HP_VILLAGES.revenue_ci = HP_VILLAGES.revenue_ci.str.replace('\(Pt\)','')
-HP_VILLAGES.revenue_ci = HP_VILLAGES.revenue_ci.str.replace('\(Pt-I\)','')
-HP_VILLAGES.revenue_ci = HP_VILLAGES.revenue_ci.str.replace('\(Pt-II\)','')
-HP_VILLAGES.revenue_ci = HP_VILLAGES.revenue_ci.str.replace('\n',' ')
-HP_VILLAGES.revenue_ci = HP_VILLAGES.revenue_ci.str.strip()
-
-HP_VILLAGES.sdtname_2 = HP_VILLAGES.sdtname_2.str.replace('\(Pt\)','')
-HP_VILLAGES.sdtname_2 = HP_VILLAGES.sdtname_2.str.replace('\(Pt-I\)','')
-HP_VILLAGES.sdtname_2 = HP_VILLAGES.sdtname_2.str.replace('\(Pt-II\)','')
-'''
 #tenders_df['location'] = tenders_df['location'].fillna(tenders_df['Location'])
 
 # Dropping the original columns if you no longer need them

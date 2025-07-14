@@ -2,11 +2,11 @@ import pandas as pd
 import os
 import geopandas as gpd
 
-data_path = os.getcwd()+'/Sources/TENDERS/data/'
-od_gdf = gpd.read_file(os.getcwd()+r'/Maps/up_ids-drr_shapefiles/UP_Subdistrict_final_modified.geojson')
+data_path = os.getcwd()+r'/Sources/TENDERS/data/'
+up_gdf = gpd.read_file(os.getcwd()+r'/Maps\up_ids-drr_shapefiles\UP_subdistrict_final_4326.geojson')
 
-flood_tenders_geotagged_df = pd.read_csv(data_path + 'floodtenders_subdistrictgeotagged.csv')
-flood_tenders_geotagged_df = flood_tenders_geotagged_df.merge(od_gdf,
+flood_tenders_geotagged_df = pd.read_csv(data_path + r'floodtenders_subdistrictgeotagged.csv')
+flood_tenders_geotagged_df = flood_tenders_geotagged_df.merge(up_gdf,
                                  left_on = ['DISTRICT_FINALISED', 'BLOCK_FINALISED'],
                                  right_on = ['dtname', 'sdtname'],
                                  how='left')
