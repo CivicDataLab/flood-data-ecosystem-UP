@@ -44,7 +44,7 @@ csvs = glob.glob(data_path+'*.csv')
 
 for csv in csvs:
     filename  = re.split(r'/',csv)[-1]
-    #filename  = re.split(r'\\',csv)[-1]
+    filename  = re.split(r'\\',csv)[-1]
     print ("FILENAME"+ filename)
     input_df = pd.read_csv(csv)
     
@@ -83,6 +83,13 @@ for csv in csvs:
     # Classify tenders based on Monsoons
     for index, row in tenders_df.iterrows():
         monsoon = "" 
+        before_rows = tenders_df.shape[0]
+        try:
+            published_date = dateutil.parser.parse(row['Published Date'])
+        except (ValueError, TypeError):
+            tenders_df.drop(index, inplace=True)    
+            continue
+        after_rows = tenders_df.shape[0]
         published_date = dateutil.parser.parse(row['Published Date'])
         if 3 <= published_date.month <= 5:
             monsoon = "Pre-Monsoon"
@@ -91,6 +98,8 @@ for csv in csvs:
         else:
             monsoon = "Post-Monsoon"
         tenders_df.loc[index, "Season"] = monsoon
+        Dropped_rows = before_rows - after_rows
+        print(Dropped_rows)
 
     # identify scheme related information
     schemes_identified = []
@@ -209,8 +218,8 @@ print("Found flood files:", csvs)
 
 dfs=[]
 for csv in csvs:
-    #csv = csv.replace("//", "/")
-    #csv = csv.replace("\\", "/")
+    csv = csv.replace("//", "/")
+    csv = csv.replace("\\", "/")
     month = csv.split(r'/')[-1][:7]
     df = pd.read_csv(csv)
     df['month'] = month
