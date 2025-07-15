@@ -66,18 +66,19 @@ def process_frame(df):
 
 # 1️⃣ Handle any “flat” CSVs in SCRAPED_PATH
 for csv_path in glob.glob(os.path.join(SCRAPED_PATH, '*.csv')):
+    print(csv_path)
     df = pd.read_csv(csv_path, dtype=str)
     df = process_frame(df)
 
     for ym, group in df.groupby('year_month'):
         out_file = os.path.join(DATA_PATH, f'{ym}_tenders.csv')
-        group.drop(columns=['year_month']) \
-             .to_csv(out_file, index=False)
+        #group.drop(columns=['year_month']) \
+        group.to_csv(out_file, index=False)
         print(f'Wrote {len(group)} tenders → {os.path.basename(out_file)}')
 
 # 2️⃣ Fall back to your existing year/month‐folder logic
-for year in range(2020, 2021):
-    for month in range(1, 4):
+for year in range(2021, 2025):
+    for month in range(1, 13):
         ym = f"{year}_{month:02d}"
         folder = os.path.join(SCRAPED_PATH, ym)
         csvs = glob.glob(os.path.join(folder, '*.csv'))
@@ -89,6 +90,6 @@ for year in range(2020, 2021):
         master = process_frame(master)
 
         out_file = os.path.join(DATA_PATH, f'{ym}_tenders.csv')
-        master.drop(columns=['year_month']) \
-              .to_csv(out_file, index=False)
+        #master.drop(columns=['year_month']) \
+        master.to_csv(out_file, index=False)
         print(f'Wrote {len(master)} tenders → {os.path.basename(out_file)}')
