@@ -49,7 +49,7 @@ for csv in csvs:
     input_df = pd.read_csv(csv)
     
     # De-Duplication (Change the logic once the time of scraping is added in the input_df)
-    input_df = input_df.drop_duplicates()
+    #input_df = input_df.drop_duplicates()
     tender_ids = input_df["Tender ID"]
     # duplicates_df = input_df[tender_ids.isin(tender_ids[tender_ids.duplicated()])].sort_values("Tender ID")
     # input_df = input_df.drop(duplicates_df[duplicates_df['No of Bids Received'].isnull()].index)
@@ -85,12 +85,12 @@ for csv in csvs:
         monsoon = "" 
         before_rows = tenders_df.shape[0]
         try:
-            published_date = dateutil.parser.parse(row['Published Date'])
+            published_date = dateutil.parser.parse(row['Contract Date :'])# Should be Published Date
         except (ValueError, TypeError):
             tenders_df.drop(index, inplace=True)    
             continue
         after_rows = tenders_df.shape[0]
-        published_date = dateutil.parser.parse(row['Published Date'])
+        published_date = dateutil.parser.parse(row['Contract Date :'])# Should be Published Date
         if 3 <= published_date.month <= 5:
             monsoon = "Pre-Monsoon"
         elif 6 <= published_date.month <= 9:
