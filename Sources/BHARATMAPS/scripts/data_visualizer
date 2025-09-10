@@ -56,7 +56,7 @@ for variable,folder in zip(variables,variable_folder):
                 print(f"Error processing {csv_file}: {e}")
 
 pivot_df = merged_df.pivot_table(index = ['object_id'],columns='variable',values='value').reset_index()
-shp_merge = pivot_df.merge(shp[['object_id','dtname','geometry']],on='object_id', how='left')
+shp_merge = pivot_df.merge(shp[['object_id','dtname','sdtname','geometry']],on='object_id', how='left')
 
 output_folder = "/Users/stephensmathew/cdl_rep/flood-data-ecosystem-UP/Sources/BHARATMAPS/visualizations"
 os.makedirs(output_folder,exist_ok=True)
