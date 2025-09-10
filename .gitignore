@@ -10,7 +10,9 @@ scraped_data.csv
 bharatmaps_vil2017_odisha.geojson
 Odisha_antyodaya_village_dataset.xlsx
 UP_Villages_Boundary_Simplified.geojson
-*.zip
+merged_roads.geojson
+schools_up.geojson
+# *.zip
 *.grd
 
 #Don't ignore zip files in Map
