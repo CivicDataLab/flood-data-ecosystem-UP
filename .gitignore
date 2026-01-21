@@ -14,7 +14,7 @@ merged_roads.geojson
 schools_up.geojson
 # *.zip
 *.grd
-
+*.png
 #Don't ignore zip files in Map
 !Maps/*.zip
 
