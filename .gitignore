@@ -1,5 +1,5 @@
 #Folders to ignore
-Analysis/
+#Analysis/
 
 #Large files
 *.nc
@@ -100,7 +100,7 @@ docs/_build/
 target/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+#.ipynb_checkpoints
 
 # IPython
 profile_default/
