@@ -1,338 +1,304 @@
-#from WebDriver import WebDriver
-from Utils import SeleniumScrappingUtils
-import time 
+from selenium.webdriver.support.wait import WebDriverWait
+import time
 import os
 import warnings
-from captcha import captcha
-import re
-import pdb
+import json
+from urllib.parse import urlparse, parse_qs
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import multiprocessing
+from pathlib import Path
+
+from Utils import SeleniumScrappingUtils
 from selenium.webdriver.common.by import By
-
-from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.firefox.options import Options
-import glob
-import pandas as pd
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
-import sys
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
-import pytesseract
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+import http_utils
+import extract_tender
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-year = "2024"#sys.argv[1]
-month = "3"#sys.argv[2]
-
-month_start = str(int(month)-1)
-month_end = str(int(month)-1)
-if month_end in ['0','2','4','6','7','9','11']:
-    date_end = '31'
-elif month_end=='1':
-    date_end='28'
-else:
-    date_end = '30'
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-if int(month)<10:
-    month = '0'+str(month)
-folder = year+'_'+str(month)
+# Config (edit if needed)
+
+URL = "https://etender.up.nic.in/nicgep/app?page=WebTenderStatusLists&service=page"
+TENDER_STATUS_VALUE = "6"  # current script uses "6"
+
+# Where to store outputs (relative to repo/run location)
+CWD = Path.cwd()
+SCRAPER_STATE_DIR = CWD / "Sources" / "TENDERS" / "scripts" / "scraper" / "scraped_recent_tenders"
+SCRAPER_STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+SP_TOKENS_PATH = SCRAPER_STATE_DIR / "sp_tokens.json"
+COOKIES_PATH = SCRAPER_STATE_DIR / "cookies.json"
+
+# HTML output root (each page becomes a folder under this)
+HTML_OUTPUT_DIR = SCRAPER_STATE_DIR / "saved_html"
+HTML_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# Where to write extracted CSVs from saved HTML
+EXTRACTED_OUT_DIR = SCRAPER_STATE_DIR / "extracted_csvs"
+EXTRACTED_OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# Where to write view-details SP tokens extracted by http_utils
+VIEW_MORE_SP_JSON_PATH = SCRAPER_STATE_DIR / "details_page_sptokens.json"
+
+
+
+# Selenium driver setup
+
+chromedriver_path = ""  # keep as your existing approach, empty means default path
+
+chrome_options = Options()
+# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.page_load_strategy = "eager"
+chrome_options.add_argument("--start-maximized")
+
+chrome_options.add_argument("--disable-extensions")
+chrome_options.add_argument("--disable-infobars")
+chrome_options.add_argument("--disable-notifications")
+chrome_options.add_argument("--disable-cloud-import")
+chrome_options.add_argument("--disable-sync")
+chrome_options.add_argument("--disable-client-side-phishing-detection")
+chrome_options.add_argument("--disable-background-networking")
+chrome_options.add_argument("--disable-background-timer-throttling")
+chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+chrome_options.add_argument("--disable-component-update")
+chrome_options.add_argument("--disable-default-apps")
+chrome_options.add_argument("--log-level=3")
+
+chrome_service = Service(chromedriver_path)
+driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
+driver.get(URL)
+
+# Keep your table-type mapping
+dict_tables_type = {
+    "Bids List": "Vertical",
+    "Technical Bid Opening Summary": "Horizontal",
+    "Technical Evaluation Summary Details": "Horizontal",
+    "Bid Opening Summary": "Horizontal",
+    "Finance Bid Opening Summary": "Horizontal",
+    "Financial Evaluation Bid List": "Vertical",
+    "Finance Evaluation Summary Details": "Horizontal",
+    "AOC": "Horizontal",
+    "Awarded Bids List": "Vertical",
+    "Tender Revocation List": "Vertical",
+    "Corrigendum Details": "Vertical",
+}
+
+
+# Captcha helper
+
 try:
-    print(os.getcwd())
-    os.mkdir(os.getcwd()+r'/Sources/TENDERS/scripts/scraper/scraped_recent_tenders/'+folder)
-except FileExistsError:
-    pass
+    from captcha import captcha_ocr  # type: ignore
+    _solve_captcha = lambda: captcha_ocr()
+except Exception:
+    from captcha import captcha  # type: ignore
+    _solve_captcha = lambda: captcha(driver, '//*[@id="captchaImage"]')
 
-try:
-    os.mkdir(os.getcwd()+r'/Sources/TENDERS/scripts/scraper/scraped_recent_tenders/concatinated_csvs')
-except:
-    pass
 
-url = r'https://etender.up.nic.in/nicgep/app?page=WebTenderStatusLists&service=page'
-print(url)
-firefox_options = Options()
-firefox_options.headless = True
-#service=Service(r"D:\CivicDataLab_IDS-DRR\IDS-DRR_Github\IDS-DRR-Assam\Sources\TENDERS\scripts\scraper\chromedriver")
-service = Service(r"C:\Users\saura\anaconda3\Scripts\geckodriver.exe")
-#browser = WebDriver()
-print(firefox_options)
-os.chdir(os.getcwd()+r"/Sources/TENDERS/scripts/scraper/scraped_recent_tenders")
-dict_tables_type = {"Bids List": "Vertical","Technical Bid Opening Summary":"Horizontal",
-                   "Technical Evaluation Summary Details":"Horizontal",
-                   "Bid Opening Summary":"Horizontal",
-                   "Finance Bid Opening Summary":"Horizontal",
-                   "Financial Evaluation Bid List":"Vertical",
-                   "Finance Evaluation Summary Details":"Horizontal",
-                   "AOC":"Horizontal",
-                   "Awarded Bids List":"Vertical",
-                   "Tender Revocation List":"Vertical",
-                   "Corrigendum Details":"Vertical"}
+def captcha_input(driver, xpath_image, xpath_input_text, reload_button_xpath=None, max_attempts=12):
+    invalid_xpath = '//*[@id="If_19"]/table/tbody/tr/td/span/b'
+    search_xpath = '//*[@id="Search"]'
 
-dict_tender_status = {'1': "To be Opened Tenders",
-                      '2': "Technical Bid Opening",
-                      '3': "Technical Evaluation",
-                      '4': "Financial Bid Opening",
-                      '5': "Financial Evaluation",
-                      '6': "AOC",
-                      '7': "Retender",
-                      '8': "Cancelled"}
+    if reload_button_xpath is None:
+        reload_button_xpath = "/html/body/div[1]/table/tbody/tr[2]/td/table/tbody/tr/td[2]/form/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[4]/td/table/tbody/tr/td/table/tbody/tr[19]/td/table/tbody/tr/td[3]/button"
 
-def sanitize_filename(filename):
-    # Remove invalid characters: \ / : * ? " < > | (on Windows)
-    sanitized = re.sub(r'[<>:"/\\|?*₹,]', '', filename)
-    # Optionally replace spaces with underscores
-    sanitized = sanitized.replace(' ', '_')
-    return sanitized
+    for attempt in range(1, max_attempts + 1):
+        captcha_element = driver.find_element(By.XPATH, xpath_image)
+        SeleniumScrappingUtils.save_image_as_png(captcha_element)
 
-'''
-def captcha_input(xpath_image,xpath_input_text):
-    #captcha_text = captcha(browser,xpath_image)
-    pdb.set_trace()
-    captcha_input_element = SeleniumScrappingUtils.get_page_element(browser,xpath_input_text)
-    #SeleniumScrappingUtils.input_text_box(browser, captcha_input_element,captcha_text)
-    #wait = WebDriverWait(browser, 10)
-    button = browser.find_element(By.XPATH, "//*[@id='Search']") 
-    button.click()
-    invalid_string = browser.find_elements(By.CLASS_NAME,"error")
-    print(invalid_string)
-    if len(invalid_string)==0:
-        pass
-    else:
-        while 'Invalid Captcha!' in invalid_string[0].text:
-            captcha_text = captcha(browser,xpath_image)
-            captcha_input_element = SeleniumScrappingUtils.get_page_element(browser,xpath_input_text)
-            SeleniumScrappingUtils.input_text_box(browser, captcha_input_element,captcha_text)
-            time.sleep(3)
-            
-            button = browser.find_element(By.XPATH, "//*[@id='Search']")
-            button.click()
+        text = _solve_captcha()
 
-            invalid_string = browser.find_elements(By.CLASS_NAME,"error")
-            if len(invalid_string)==0:
-                break
-            elif 'Invalid Captcha!' not in invalid_string[0].text:
-                break
-            else:
-                pass
-'''
-def captcha_input(xpath_image, xpath_input_text):
-    # 1) wait for the captcha <img> to load
-    img = WebDriverWait(browser, 10).until(
-        EC.presence_of_element_located((By.XPATH, xpath_image))
+        captcha_input_element = SeleniumScrappingUtils.get_page_element(driver, xpath_input_text)
+        captcha_input_element.clear()
+        SeleniumScrappingUtils.input_text_box(driver, captcha_input_element, text)
+
+        driver.find_element(By.XPATH, search_xpath).click()
+        time.sleep(2)
+        driver.refresh()
+        time.sleep(2)
+        if not driver.find_elements(By.XPATH, invalid_xpath):
+            return True
+
+        print(f"[captcha] attempt {attempt} failed, reloading...")
+        driver.find_element(By.XPATH, reload_button_xpath).click()
+        time.sleep(1.5)
+
+    raise RuntimeError(f"CAPTCHA failed after {max_attempts} attempts")
+
+SeleniumScrappingUtils.select_drop_down(driver, '//*[@id="tenderStatus"]', TENDER_STATUS_VALUE)
+
+
+def set_readonly_date(driver, input_id: str, date_str: str, timeout: int = 20):
+    """
+    Sets a Tapestry DatePicker input (often readonly) to date_str (dd/MM/yyyy),
+    and dispatches events so any JS listeners/validators update.
+    """
+    el = WebDriverWait(driver, timeout).until(
+        EC.presence_of_element_located((By.ID, input_id))
     )
 
-    # 2) give yourself time to read it and type it back
-    user_sol = input("🔒  Captcha is now visible in the browser.  Please type it here: ")
+    driver.execute_script(
+        """
+        const el = arguments[0];
+        const v  = arguments[1];
 
-    # 3) find the text‐box, clear & send your answer
-    captcha_box = SeleniumScrappingUtils.get_page_element(browser, xpath_input_text)
-    captcha_box.clear()
-    captcha_box.send_keys(user_sol)
+        // Ensure value can be assigned even if readonly is enforced in JS.
+        // We temporarily remove readonly attribute, set value, then restore.
+        const wasReadonly = el.hasAttribute('readonly');
+        if (wasReadonly) el.removeAttribute('readonly');
 
-    # 4) click Search
-    browser.find_element(By.ID, "Search").click()
+        el.focus();
+        el.value = v;
 
-    # 5) if it complains, let you retry
-    errs = browser.find_elements(By.CLASS_NAME, "error")
-    while errs and "Invalid Captcha!" in errs[0].text:
-        user_sol = input("⚠️  That didn’t work—please re-type the captcha: ")
-        captcha_box.clear()
-        captcha_box.send_keys(user_sol)
-        browser.find_element(By.ID, "Search").click()
-        errs = browser.find_elements(By.CLASS_NAME, "error")
+        el.dispatchEvent(new Event('input',  { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('blur',   { bubbles: true }));
 
-#Select tender status
-for tender_status_id in range(6,7): #AOC
-    browser = webdriver.Firefox(service=service, options=firefox_options)
-    browser.get(url)
-    wait = WebDriverWait(browser, 10)  # Wait up to 3 seconds
-    tender_status_id = str(tender_status_id)
-    print('tenderStatusid: ', dict_tender_status[tender_status_id])
-    SeleniumScrappingUtils.select_drop_down(browser,'//*[@id="tenderStatus"]',tender_status_id) #3
+        if (wasReadonly) el.setAttribute('readonly', 'readonly');
+        """,
+        el,
+        date_str
+    )
 
+input_from_date = input("Enter From Date (DD/MM/YYYY): ")
+input_to_date = input("Enter To Date (DD/MM/YYYY): ")
 
-    #Select date for tender scraping 
-    #from date
-    from_date_element = SeleniumScrappingUtils.get_page_element(browser, '//*[@id="frmSearchFilter"]/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[4]/td/table/tbody/tr/td/table/tbody/tr[3]/td[2]/a')
-    from_date_element.click()
-    #Select month - 0 means January
-    SeleniumScrappingUtils.select_drop_down(browser,'//*[@id="Body"]/div[2]/div[1]/table/tbody/tr/td[2]/select',value=month_start)
-    #Select year
-    SeleniumScrappingUtils.select_drop_down(browser,'//*[@id="Body"]/div[2]/div[1]/table/tbody/tr/td[3]/select',value = year)
-    #Select Date
-    #SeleniumScrappingUtils.get_page_element(browser,'//*[@id="Body"]/div[2]/div[2]/table/tbody/tr[1]/td[7]').click()
-    browser.find_element(By.XPATH, "//td[text()='1']").click()
-
-    #to_date
-    to_date_element = SeleniumScrappingUtils.get_page_element(browser, '//*[@id="frmSearchFilter"]/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[4]/td/table/tbody/tr/td/table/tbody/tr[3]/td[4]/a')
-    to_date_element.click()
-    #Select month
-    SeleniumScrappingUtils.select_drop_down(browser,'//*[@id="Body"]/div[3]/div[1]/table/tbody/tr/td[2]/select',value=month_end)
-    #Select year
-    SeleniumScrappingUtils.select_drop_down(browser,'//*[@id="Body"]/div[3]/div[1]/table/tbody/tr/td[3]/select',value = year)
-    #Select Date
-    #SeleniumScrappingUtils.get_page_element(browser,'//*[@id="Body"]/div[3]/div[2]/table/tbody/tr[5]/td[3]').click()
-    td_elements = browser.find_elements(By.XPATH, "//td[text()='{}']".format(date_end))
-    td_elements[1].click()
-
-    #break captcha
-    captcha_input('//*[@id="captchaImage"]','//*[@id="captchaText"]')
-
-    def scrape_view_more_details(browser,tender_id):
-        view_more_details_element = SeleniumScrappingUtils.get_page_element(browser,'//*[@id="DirectLink"]')
-        view_more_details_element.click()
-        #time.sleep(3)
-        #since we are opening the new window selenium needs to change the focus
-    
-        #all the table elements
-        elem_not_found = True
-        while elem_not_found:
-            try:
-                window_after = browser.window_handles[1]
-                browser.switch_to.window(window_after)
-                elem = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/table/tbody/tr/td/table/tbody/tr[4]/td/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[2]/td/table/tbody/tr[1]/td')))
-                elem_not_found = False
-            except:
-                pass
-        tables = SeleniumScrappingUtils.get_multiple_page_elements(browser,'/html/body/table/tbody/tr/td/table/tbody/tr[4]/td/table/tbody/tr/td/table/tbody/tr/td/table')[0].find_elements(By.CSS_SELECTOR,"table")
-        dict_table_section_head = {}
-        for table_section_elements in tables:
-            try:
-                dict_table_section_head[table_section_elements.find_element(By.CLASS_NAME,"section_head").text] = table_section_elements
-            except:
-                continue
-        for index, (keys, values) in enumerate(dict_table_section_head.items()):
-            keys = keys.replace("/","")
-            if keys == "Tender Documents":
-                continue
-            # elif keys == "Work /Item(s)":
-            #     SeleniumScrappingUtils.extract_horizontal_table(values,tender_id +"_"+"Work_Item"+"_" + str(index),1)
-            elif (keys.startswith("Cover Details") or keys == "Latest Corrigendum List" or keys.startswith("Other")):
-                SeleniumScrappingUtils.extract_vertical_table(values,tender_id +"_"+keys+"_" + str(index),1)
-            elif keys == "Payment Instruments":
-                table_section = values.find_element(By.CSS_SELECTOR,"table")
-                SeleniumScrappingUtils.extract_vertical_table(table_section,tender_id +"_"+keys+"_" + str(index),1)
-            else:
-                SeleniumScrappingUtils.extract_horizontal_table(values,tender_id +"_"+keys+"_" + str(index),1)
-        path_to_save = "concatinated_csvs/"
-        SeleniumScrappingUtils.concatinate_csvs(path_to_save,tender_id,dict_tender_status[tender_status_id])
-        
-        directory = os.getcwd()
-        SeleniumScrappingUtils.remove_csvs(directory)
-        window_after = browser.window_handles[0]
-        browser.switch_to.window(window_after)
-
-    def scrape_view_stage_summary(browser,tender_id,dict_tables_type):
-        list_of_dict_tables_type = list(dict_tables_type.keys())
-        SeleniumScrappingUtils.get_page_element(browser,'//*[@id="DirectLink_0"]').click()
-        #time.sleep(3)
-        
-    
-        #all the table elements
-        elem_not_found = True
-        while elem_not_found:
-            try:
-                window_after = browser.window_handles[1]
-                browser.switch_to.window(window_after)
-                elem = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'table_list')))
-                sections = browser.find_elements(By.CLASS_NAME,"table_list")
-                elem_not_found = False
-            except:
-                pass
-        
-        try:
-            sections.append(browser.find_element_by_id("table_list"))
-        except:
-            pass
-        try:
-            sections.append(browser.find_element(By.CLASS_NAME,"list_table"))
-        except:
-            pass
-        # elems = sections[0].find_elements_by_xpath('//a[@href]')
-        # for index in elems:
-        #     name = index.get_attribute("text")
-        #     if ".pdf" in name or "BOQ Comparative Chart" in name:
-        #         index.click()
-        #         time.sleep(10)
-        #         name = index.get_attribute("text").replace("/t","").replace("/n","").replace(" ","").replace("\t","").replace("\n","")
-        #         if "BOQComparativeChart" in name:
-        #             os.rename(name+".xlsx","concatinated_csvs/"+tender_id+"_"+name+".xlsx")
-        #         else:
-        #             try:
-        #                 os.rename(name,"concatinated_csvs/"+tender_id+"_"+name)
-        #             except:
-        #                 time.sleep(50)
-        #                 os.rename(name,"concatinated_csvs/"+tender_id+"_"+name)
-        for index,name in enumerate(sections):
-            if index == 0:
-                SeleniumScrappingUtils.extract_horizontal_table(name,"Org_"+tender_id,0)
-                continue 
-            header_name = name.find_element(By.CLASS_NAME,"section_head").text
-            if (header_name in list_of_dict_tables_type) & (dict_tables_type[header_name] == "Vertical"):
-                SeleniumScrappingUtils.extract_vertical_table(name,header_name+"_"+tender_id,1)
-            else:
-                SeleniumScrappingUtils.extract_horizontal_table(name,header_name+"_"+tender_id,1)
-        path_to_save = "concatinated_csvs/"
-        try:
-            SeleniumScrappingUtils.concatinate_csvs(path_to_save,"summary"+"_"+tender_id, dict_tender_status[tender_status_id])
-        except:
-            pass
+set_readonly_date(driver, "fromDate", input_from_date)
+set_readonly_date(driver, "toDate",   input_to_date)   # assuming there is an input with id="toDate"
 
 
-        
-    def get_table_links(browser,table_xpath):
-        #pdb.set_trace()
+time.sleep(0.5)
 
-        table = SeleniumScrappingUtils.get_page_element(browser,table_xpath)
-        elements_list = table.find_elements(By.CSS_SELECTOR,"a")
-        links = [element.get_attribute("href") for element in elements_list]
-        rows = table.find_elements(By.CSS_SELECTOR,"tr")
-        tender_ids = [row.find_element("xpath","td[2]").text for row in rows[1:-2]]
-        try:
-            next_page_link = table.find_elements("xpath",'//*[@id="loadNext"]')[0].get_attribute("href")
-        except:
-            next_page_link = ''
-        return table,links,next_page_link,tender_ids
 
-    def scrapeTender(browser,tender_ids,links,dict_tables_type,flag=None,):
-        #pdb.set_trace()
-        if (len(tender_ids) == 10)&(len(links)==10):
-            pass
+from_date_input = driver.find_element(By.XPATH, '//*[@id="fromDate"]')
+to_date_input = driver.find_element(By.XPATH, '//*[@id="toDate"]')
+
+
+
+
+# from_date_input.send_keys(from_date)
+# to_date_input.send_keys(to_date)
+
+# Token extraction
+
+def get_table_links(driver, table_xpath):
+    table = SeleniumScrappingUtils.get_page_element(driver, table_xpath)
+    elements_list = table.find_elements(By.CSS_SELECTOR, "a")
+    links = [element.get_attribute("href") for element in elements_list]
+    rows = table.find_elements(By.CSS_SELECTOR, "tr")
+    tender_ids = [row.find_element("xpath", "td[2]").text for row in rows[1:-2]]
+
+    next_page_elements = table.find_elements("xpath", '//*[@id="loadNext"]')
+    next_page_link = next_page_elements[0].get_attribute("href") if next_page_elements else None
+    return table, links, next_page_link, tender_ids
+
+
+def extract_sp_tokens_paginated(
+    driver,
+    output_file: Path,
+    cookies_file: Path,
+):
+
+    page_count = 1
+    all_data = {}
+
+    def extract_tokens_from_page():
+        table, links, _, tender_ids = get_table_links(driver, '//*[@id="tabList"]')
+        page_dict = {}
+
+        def process_link(tid_link_pair):
+            tender_id, link = tid_link_pair
+            parsed_url = urlparse(link)
+            query_params = parse_qs(parsed_url.query)
+            sp_token = query_params.get("sp", [""])[0]
+            return tender_id, sp_token
+
+        # Keep your parallelism style
+        with ThreadPoolExecutor(max_workers=multiprocessing.cpu_count() * 4) as executor:
+            results = executor.map(process_link, zip(tender_ids, links))
+            for tid, token in results:
+                if tid and token:
+                    page_dict[tid] = token
+
+        return page_dict
+
+    while True:
+        # Save cookies so http_utils can reuse them
+        with open(cookies_file, "w", encoding="utf-8") as f:
+            json.dump(driver.get_cookies(), f)
+
+        print(f"[sp_tokens] Processing page {page_count}...")
+        page_key = f"page_{page_count}"
+        all_data[page_key] = extract_tokens_from_page()
+
+        _, _, next_page_link, _ = get_table_links(driver, '//*[@id="tabList"]')
+        if next_page_link:
+            driver.get(next_page_link)
+            page_count += 1
         else:
-            links = links[:len(tender_ids)]
-        #pdb.set_trace()
-        for index,link in enumerate(links):
-            browser.get(link)
-            scrape_view_more_details(browser,tender_ids[index])
-            scrape_view_stage_summary(browser,tender_ids[index],dict_tables_type)
+            break
 
-            os.chdir("concatinated_csvs/")
-            SeleniumScrappingUtils.concatinate_csvs("../{}/".format(folder),"final_"+tender_ids[index], dict_tender_status[tender_status_id])
-            directory = os.getcwd()
-            SeleniumScrappingUtils.remove_csvs(directory)
-            os.chdir("../")
-            directory = os.getcwd()
-            SeleniumScrappingUtils.remove_csvs(directory)
-        # SeleniumScrappingUtils.get_page_element(browser,'//*[@id="PageLink_20"]').click()
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(all_data, f, indent=2)
 
-    if __name__ == "__main__":
-            tender_ids_list = []
-            table,links,next_page_link,tender_ids = get_table_links(browser,'//*[@id="tabList"]')
-            scrapeTender(browser,tender_ids,links,dict_tables_type,"first")
-            # try:
-            #     scrapeTender(browser,tender_ids,links,dict_tables_type,"first")
-            # except:
-            #     print('Error1')
-            #     pdb.set_trace()
-            #     pass
-            while len(next_page_link):
-                print("next")
-                browser.get(next_page_link)
-                table,links,next_page_link,tender_ids = get_table_links(browser,'//*[@id="tabList"]')
-                scrapeTender(browser,tender_ids,links,dict_tables_type)
-                # try:
-                #     scrapeTender(browser,tender_ids,links,dict_tables_type)
-                # except:
-                #     print('Error2')
-                #     pdb.set_trace()
-                #     pass
-            browser.quit()
+    print(f"[sp_tokens] Saved all SP tokens -> {output_file}")
+    print(f"[sp_tokens] Saved cookies -> {cookies_file}")
+
+
+
+if __name__ == "__main__":
+    try:
+        # Apply filters
+        time.sleep(3)
+
+
+        #  Solve captcha + search
+        captcha_input(driver, '//*[@id="captchaImage"]', '//*[@id="captchaText"]')
+        time.sleep(0.5)
+        # Extract SP tokens (and cookies)
+        extract_sp_tokens_paginated(
+            driver=driver,
+            output_file=SP_TOKENS_PATH,
+            cookies_file=COOKIES_PATH,
+        )
+
+        # Run http_utils after sp tokens exist
+
+        http_utils.COOKIE_FILE = str(COOKIES_PATH)
+        http_utils.OUTPUT_DIR = str(HTML_OUTPUT_DIR)
+        http_utils.VIEW_MORE_SP_JSON_FILE = str(VIEW_MORE_SP_JSON_PATH)
+
+        with open(SP_TOKENS_PATH, "r", encoding="utf-8") as f:
+            sp_data = json.load(f)
+
+        print(f"[http_utils] Saving HTML into -> {HTML_OUTPUT_DIR}")
+        http_utils.save_html_responses(sp_data)
+        print("[http_utils] HTML saving completed")
+
+        # Run extract_tender after HTMLs are saved
+ 
+        workers = min(16, (multiprocessing.cpu_count() or 4) * 2)
+        print(f"[extract_tender] Extracting CSVs into -> {EXTRACTED_OUT_DIR} (workers={workers})")
+        extract_tender.process_tree(
+            root_dir=str(HTML_OUTPUT_DIR),
+            out_dir=str(EXTRACTED_OUT_DIR),
+            workers=workers,
+            skip_existing=True,
+        )
+        print("[extract_tender] Extraction completed")
+
+    except Exception as e:
+        print(f"error: {e}")
+
+    finally:
+        try:
+            driver.quit()
+        except Exception:
+            pass

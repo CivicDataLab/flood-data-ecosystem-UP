@@ -1,46 +1,63 @@
-from Utils import SeleniumScrappingUtils
-from PIL import Image, ImageFilter
-from pytesseract import image_to_string 
-import numpy
-from scipy.ndimage.filters import gaussian_filter
+import cv2
+import numpy as np
+import easyocr
+import re
 import os
-from selenium.webdriver.common.by import By
 
-#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+current_directory = os.getcwd()
+print(f"Current working directory: {current_directory}")
+def keep_large_regions(
+    binary_img,
+    min_area: int = 70
+):
+    inv = 255 - binary_img
 
-th1 = 140
-th2 = 140 # threshold after blurring 
-sig = 1.5 
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(inv, connectivity=8)
 
-def captcha(browser,captcha_image_xpath):
-    captcha_image_element = SeleniumScrappingUtils.get_page_element(browser,captcha_image_xpath)
-    SeleniumScrappingUtils.save_image_as_png(captcha_image_element)
-    original = Image.open('captcha_image.png')
-    original.save("original.png")
-    black_and_white =original.convert("L") 
-    black_and_white.save("black_and_white.png")
+    h, w = binary_img.shape
+    rgba = np.zeros((h, w, 4), dtype=np.uint8)  # RGBA
 
-    first_threshold = black_and_white.point(lambda p: p > th1 and 255)
-    first_threshold.save("first_threshold.png")
+    for i in range(1, num_labels):
+        if stats[i, cv2.CC_STAT_AREA] >= min_area:
+            mask = labels == i
+            rgba[mask] = (0, 0, 0, 255)  # black, opaque
+
+    return rgba
+
+def captcha_ocr():
+    img = cv2.imread(rf"{current_directory}\captcha_image.png", cv2.IMREAD_GRAYSCALE)
+
+    # Convert to binary 
+    _, img = cv2.threshold(img, 128, 255, cv2.THRESH_BINARY)
+    rgba = keep_large_regions(img, min_area=75)
+
+    # set transparent areas to white
+
+    rgb = rgba[:, :, :3]
+    alpha = rgba[:, :, 3] / 255.0
+
+    white_bg = np.ones_like(rgb, dtype=np.uint8) * 255
+    out = (rgb * alpha[..., None] + white_bg * (1 - alpha[..., None])).astype(np.uint8)
+
+    cv2.imwrite(rf"{current_directory}\Sources\TENDERS\scripts\scraper\ocr_ready.png", out) 
+
+    # "en" for English
+    reader = easyocr.Reader(['en'])
+
+    image_path = rf"{current_directory}\Sources\TENDERS\scripts\scraper\ocr_ready.png"
+
+    image = cv2.imread(image_path)
+
+    # Perform OCR
+    result = reader.readtext(image)
+
+    #remove any non alphanumeric characters
+    text = "".join(re.sub(r"[^A-Za-z0-9]", "", d[1])
+        for d in result
+    )
+    print(f"OCR Result: {text}")
+
+    return text
 
 
-    blur=numpy.array(first_threshold) #create an image array
-    blurred = gaussian_filter(blur, sigma=sig)
-    blurred = Image.fromarray(blurred)
-    blurred.save("blurred.png")
 
-    final = blurred.point(lambda p: p > th2 and 255)
-    final = final.filter(ImageFilter.EDGE_ENHANCE_MORE)
-    final = final.filter(ImageFilter.SHARPEN)
-    final.save("final.png")
-
-    #         remove images 
-    os.remove("black_and_white.png")
-    os.remove("first_threshold.png")
-    os.remove("blurred.png")
-    os.remove("original.png")
-
-
-    config = ("-l eng --oem 3 --psm 11")
-    captcha_text = image_to_string(Image.open('final.png'), lang = "eng",config=config)
-    return captcha_text

@@ -3,7 +3,7 @@ import glob
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import os
-path = os.getcwd()+r'/Sources/WORLDPOP/'
+path = os.getcwd()+"/Sources/WORLDPOP/"
 print(path)
 import sys
 global projected_variable
