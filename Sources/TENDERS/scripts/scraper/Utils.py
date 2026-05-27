@@ -24,7 +24,7 @@ def sanitize_filename(filename):
     return sanitized
 
 MAX_RELOADS = 3
-SLEEP_TIME = 5
+SLEEP_TIME = 15
 class SeleniumScrappingUtils(object):
     def __init__(self):
         pass

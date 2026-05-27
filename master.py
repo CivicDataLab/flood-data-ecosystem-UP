@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 import glob
 
-main_directory = Path.cwd() / r'Sources'
+main_directory = Path.cwd() / 'Sources'
 print(main_directory)
 
 
@@ -19,11 +19,11 @@ for root, dirs, files in os.walk(main_directory):
         for csv in csv_files:
             #csv = csv.resolve()
                 #one-time
-            if any(folder in str(csv.parts) for folder in ['BHARATMAPS', 'GCN250', 'NASADEM', 'NERDRR', 'ANTYODAYA']):
+            if any(folder in str(csv.parts) for folder in ['BHARATMAPS', 'NASADEM', 'ANTYODAYA']):
                 timeperiod = ''
                 file_name = csv.stem
                 # Annual 
-            elif any(folder in str(csv.parts) for folder in ['WORLDPOP', 'WRIS']):
+            elif any(folder in str(csv.parts) for folder in ['WORLDPOP']):
                 year_match = re.findall(r'\d{4}', csv.name)
                 #if year_match:
                 timeperiod = year_match[0]

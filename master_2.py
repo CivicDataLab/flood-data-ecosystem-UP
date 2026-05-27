@@ -6,10 +6,10 @@ import geopandas as gpd
 import warnings
 warnings.filterwarnings("ignore")
 
-variables_data_path = os.getcwd() + r'/Sources/master/'
-up_sd = gpd.read_file(r'Maps/up_ids-drr_shapefiles/UP_subdistrict_final_4326.geojson')
+variables_data_path = os.getcwd() + '/Sources/master/'
+up_sd = gpd.read_file('Maps/up_ids-drr_shapefiles/UP_subdistrict_final_4326.geojson')
 
-date_range = pd.date_range(start="2021-04-01", end="2025-06-30", freq='MS')
+date_range = pd.date_range(start="2025-04-01", end="2026-04-30", freq='MS')
 
 # Format the date values as "YYYY_MM" strings
 formatted_dates = [date.strftime('%Y_%m') for date in date_range]
@@ -32,7 +32,8 @@ monthly_variables = ['total_tender_awarded_value',
                      #'RIDF_tenders_awarded_value', #'LTIF_tenders_awarded_value', 'CIDF_tenders_awarded_value',
                       #'Preparedness Measures_tenders_awarded_value', 
                       #'Immediate Measures_tenders_awarded_value', 
-                      #'Others_tenders_awarded_value',
+                      'Others_tenders_awarded_value',
+                      'Repair and Restoration_tenders_awarded_value',
                       #'Total_Animal_Washed_Away', 'Total_Animal_Affected',
                       #'Population_affected_Total', 'Crop_Area',
                       #'Male_Camp', 'Female_Camp', 'Children_Camp',
@@ -40,8 +41,11 @@ monthly_variables = ['total_tender_awarded_value',
                      #'Human_Live_Lost_Children', 'Human_Live_Lost_Female', 'Human_Live_Lost_Male',
                      #'Embankments affected', 'Roads', 'Bridge', 'Embankment breached',
                      'rainfall',#'runoff',
+                     #'total_expenditure_value',
+                     #'Others_expenditure_value',
+                     #'Repair and Restoration_expenditure_value',
                      #'ndvi_subdis', 'ndbi_subdis',
-                     'inundation', #'riverlevel'
+                     'inundation_pct', #'riverlevel'
                      ]
 
 for variable in monthly_variables:
@@ -69,9 +73,8 @@ master_df = master_df.drop(['Male_Camp', 'Female_Camp', 'Children_Camp',
 '''
 #Annual variables
 master_df['year'] = master_df['timeperiod'].str[:4].astype(int)
-annual_variables = [#'mean_sex_ratio', 'sum_aged_population', 'sum_young_population', 
-                    'sum_population']#,
-                    #'final_lu']
+annual_variables = ['mean_sex_ratio', 'sum_aged_population', 'sum_young_population', 'sum_population',
+                    ]
 
 for variable in annual_variables:
     variable_df = pd.read_csv(variables_data_path + variable + '.csv')
@@ -86,8 +89,8 @@ print(zero_counts)
 print(master_df.columns)
 
 # one-time variables
-onetime_variables = [#'Schools', 'RailLengths', 'RoadLengths','HealthCenters',#'gcn250_average', 
-                     #'slope_elevation',
+onetime_variables = ['Schools', 'RailLengths', 'RoadLengths','HealthCenters',#'gcn250_average', 
+                     'elevation',
                       'antyodaya_variables'#, 'drainage_density','distance_from_river','distance_from_sea']
                      #'distance_from_river_polygon',
                      ]
@@ -110,8 +113,7 @@ for variable in onetime_variables:
 
 
 
-#master_df = master_df.drop([#'year', #'count_gcn250_pixels',
-#                            'count_bhuvan_pixels', 'count_inundated_pixels'], axis=1)
+master_df = master_df.drop(['count_bhuvan_pixels', 'count_inundated_pixels'], axis=1)
 
 #master_df['year'] = master_df['timeperiod'].str[:4]
 #master_df['month'] = master_df['timeperiod'].str[-2:]

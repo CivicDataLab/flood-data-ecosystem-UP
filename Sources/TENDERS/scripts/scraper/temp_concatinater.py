@@ -77,7 +77,7 @@ for csv_path in glob.glob(os.path.join(SCRAPED_PATH, '*.csv')):
         print(f'Wrote {len(group)} tenders → {os.path.basename(out_file)}')
 
 # 2️⃣ Fall back to your existing year/month‐folder logic
-for year in range(2021, 2025):
+for year in range(2026, 2027):
     for month in range(1, 13):
         ym = f"{year}_{month:02d}"
         folder = os.path.join(SCRAPED_PATH, ym)

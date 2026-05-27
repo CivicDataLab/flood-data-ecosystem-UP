@@ -41,10 +41,7 @@ class WorldPopDataFetcher:
         self.async_threshold = async_threshold  # bytes length threshold to prefer async
 
         # If output_dir is not provided, create/use a year-based directory
-        self.output_dir = Path(
-            output_dir
-            or f"/Users/stephensmathew/cdl_rep/flood-data-ecosystem-UP/Sources/WORLDPOP/data/agesexstructure/{self.year}"
-        )
+      
         # If the folder already exists, this will NOT delete it; just reuse it
         self.output_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Using output directory: {self.output_dir}")
