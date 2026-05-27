@@ -17,7 +17,7 @@ DATA_FOLDER = os.path.abspath(CURRENT_FOLDER + "/../" + "data")
 TIFF_DATA_FOLDER = os.path.join(DATA_FOLDER, "rain", "tiff")
 CSV_DATA_FOLDER = os.path.join(DATA_FOLDER, "rain", "csv")
 
-ADMIN_BDRY_GDF = gpd.read_file(path + r"/Maps\up_ids-drr_shapefiles\UP_subdistrict_final_4326.geojson")
+ADMIN_BDRY_GDF = gpd.read_file(path + "/Maps/up_ids-drr_shapefiles/UP_subdistrict_final_4326.geojson")
 
 
 def download_data(year: int, start_date: str, end_date: str):
@@ -161,15 +161,7 @@ def retrieve_subdistrict_data(year: int):
         "01",
         "02",
         "03",
-        "04",
-        "05",
-        "06",
-        "07",
-        "08",
-        "09",
-        "10",
-        "11",
-        "12",
+        "04"
     ]:
         month_and_year_filename = "{}_{}".format(str(year), str(month))
         try:
@@ -212,14 +204,20 @@ def retrieve_subdistrict_data(year: int):
 
 
 if __name__ == "__main__":
-
     # Takes year as an input from the cli
-    year = str(sys.argv[1])
-    year = int(year)
+    year = int(input("Enter the year: "))
 
     # IF the year is current year, specify start and end date
-    start_date = "2025-01-01"
-    end_date = "2025-06-30"
+    now = datetime.now()
+
+    if year == now.year:
+        start_date = input("Enter start date (YYYY-MM-DD): ")
+        end_date = input("Enter end date (YYYY-MM-DD): ")
+    else:
+        # For historical years, these will be ignored by the functions
+        start_date = f"{year}-01-01"
+        end_date = f"{year}-04-30"
+
 
     download_data(year, start_date=start_date, end_date=end_date)
     parse_and_format_data(year, start_date=start_date, end_date=end_date)
