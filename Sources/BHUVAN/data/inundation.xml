@@ -2,32 +2,7 @@
   <Service name="WMS">
     <Version>1.1.1</Version>
     <ServerUrl>https://bhuvan-gp1.nrsc.gov.in/bhuvan/wms?&amp;SERVICE=WMS</ServerUrl>
-    <Layers>flood%3Aup_2022_26_10
-    "2020_13_07",
-    "2020_16_07",
-    "2020_21_07_18",
-    "2020_28_07_18",
-    "2020_30_07",
-    "2020_01_08_06",
-    "2020_05_08",
-    "2020_09_08_16",
-    "2020_10_08_06",
-    "2020_12_08_06",
-    "2020_14_08_18",
-    "2020_17_08_06",
-    "2020_19_08_18",
-    "2020_20_08",
-    "2020_22_08_18",
-    "2020_01_24_08",  # for the “01-24/08/2020” range
-    "2020_27_08_06",
-    "2020_29_08_06",
-    "2020_31_08_18",
-    "2020_02_09_18",
-    "2020_05_09_06",
-    "2020_29_09"
-
-    
-    </Layers>
+    <Layers>flood%3Aup_2021_17_09_06</Layers>
     <SRS>EPSG%3A4326</SRS>
     <ImageFormat>image%2Fpng</ImageFormat>
     <Transparent>TRUE</Transparent>
