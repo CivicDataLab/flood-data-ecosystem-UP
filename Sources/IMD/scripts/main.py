@@ -85,11 +85,11 @@ def transform_resample_monthly_tif_filenames(tif_filename: str):
         dst.write(reversed_data, 1)
 
     os.system(
-        """gdalwarp -tr 0.01 -0.01 -r sum {} {} -co COMPRESS=DEFLATE""".format(
-            tif_filename.replace(".tif", "_flipped.tif"),
-            tif_filename.replace(".tif", "_resampled.tif"),
-        )
+    """gdalwarp -overwrite -tr 0.01 -0.01 -r sum {} {} -co COMPRESS=DEFLATE""".format(
+        tif_filename.replace(".tif", "_flipped.tif"),
+        tif_filename.replace(".tif", "_resampled.tif"),
     )
+)
 
     # Divide each pixel by 625 to maintain overall sum_rainfall (625 small pixels = 1 big pixel based on our ts and tr)
     os.system(
@@ -158,10 +158,8 @@ def retrieve_subdistrict_data(year: int):
     Retrives subdistrict data from the year wise .tif file
     """
     for month in [
-        "01",
-        "02",
-        "03",
-        "04"
+        "05",
+
     ]:
         month_and_year_filename = "{}_{}".format(str(year), str(month))
         try:
@@ -215,8 +213,8 @@ if __name__ == "__main__":
         end_date = input("Enter end date (YYYY-MM-DD): ")
     else:
         # For historical years, these will be ignored by the functions
-        start_date = f"{year}-01-01"
-        end_date = f"{year}-04-30"
+        start_date = f"{year}-05-01"
+        end_date = f"{year}-05-31"
 
 
     download_data(year, start_date=start_date, end_date=end_date)

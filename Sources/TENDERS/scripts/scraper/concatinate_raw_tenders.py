@@ -3,7 +3,7 @@ import os
 import glob
 
 # 2025: months 08 to 12
-for year, month_range in [("2026", range(1,5))]:
+for year, month_range in [("2026", range(4,6))]:
     for month in month_range:
         month = str(month)
         if int(month) < 10:

@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 variables_data_path = os.getcwd() + '/Sources/master/'
 up_sd = gpd.read_file('Maps/up_ids-drr_shapefiles/UP_subdistrict_final_4326.geojson')
 
-date_range = pd.date_range(start="2025-04-01", end="2026-04-30", freq='MS')
+date_range = pd.date_range(start="2025-04-01", end="2026-05-30", freq='MS')
 
 # Format the date values as "YYYY_MM" strings
 formatted_dates = [date.strftime('%Y_%m') for date in date_range]
@@ -31,7 +31,7 @@ monthly_variables = ['total_tender_awarded_value',
                      #'SDRF_tenders_awarded_value', 
                      #'RIDF_tenders_awarded_value', #'LTIF_tenders_awarded_value', 'CIDF_tenders_awarded_value',
                       #'Preparedness Measures_tenders_awarded_value', 
-                      #'Immediate Measures_tenders_awarded_value', 
+                      'Immediate Measures_tenders_awarded_value', 
                       'Others_tenders_awarded_value',
                       'Repair and Restoration_tenders_awarded_value',
                       #'Total_Animal_Washed_Away', 'Total_Animal_Affected',
