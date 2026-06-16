@@ -1,5 +1,5 @@
 #Folders to ignore
-Analysis/
+#Analysis/
 
 #Large files
 *.nc
@@ -14,7 +14,7 @@ merged_roads.geojson
 schools_up.geojson
 # *.zip
 *.grd
-
+*.png
 #Don't ignore zip files in Map
 !Maps/*.zip
 
@@ -100,7 +100,7 @@ docs/_build/
 target/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+#.ipynb_checkpoints
 
 # IPython
 profile_default/
