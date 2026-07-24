@@ -50,14 +50,21 @@ csvs = glob.glob(str(path / '*.csv'))
 print(path)
 dfs = []
 for csv in csvs:
-    month = re.findall(r'\d{4}_\d{2}', csv)[0]
+    date_match = re.findall(r'\d{4}_\d{2}', csv)
+    if not date_match:
+        print(f"Skipping {csv} - no date pattern found")
+        continue
+    month = date_match[0]
     df = pd.read_csv(csv)
     df['timeperiod'] = month
     dfs.append(df)
 
-master_df = pd.concat(dfs)
-master_df = master_df.rename(columns={'max': 'max_rain', 'mean':'mean_rain', 'sum':'sum_rain'})
-master_df.to_csv(main_directory / 'master/rainfall.csv', index=False)
+if dfs:
+    master_df = pd.concat(dfs)
+    master_df = master_df.rename(columns={'max': 'max_rain', 'mean':'mean_rain', 'sum':'sum_rain'})
+    master_df.to_csv(main_directory / 'master/rainfall.csv', index=False)
+else:
+    print("No IMD files found with date pattern")
 
 # BHUVAN
 path = main_directory / 'BHUVAN/data/variables/inundation_pct'

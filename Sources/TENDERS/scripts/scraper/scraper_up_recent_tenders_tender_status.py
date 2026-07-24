@@ -3,7 +3,6 @@ from Utils import SeleniumScrappingUtils
 import time 
 import os
 import warnings
-from captcha import captcha
 import re
 import pdb
 from selenium.webdriver.common.by import By
