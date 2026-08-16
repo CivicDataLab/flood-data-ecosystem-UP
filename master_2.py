@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 variables_data_path = os.getcwd() + '/Sources/master/'
 up_sd = gpd.read_file('Maps/up_ids-drr_shapefiles/UP_subdistrict_final_4326.geojson')
 
-date_range = pd.date_range(start="2025-04-01", end="2026-06-30", freq='MS')
+date_range = pd.date_range(start="2025-04-01", end="2026-07-31", freq='MS')
 
 # Format the date values as "YYYY_MM" strings
 formatted_dates = [date.strftime('%Y_%m') for date in date_range]

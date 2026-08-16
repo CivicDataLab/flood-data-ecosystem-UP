@@ -2,22 +2,22 @@
   <Service name="WMS">
     <Version>1.1.1</Version>
     <ServerUrl>https://bhuvan-gp1.nrsc.gov.in/bhuvan/wms?&amp;SERVICE=WMS</ServerUrl>
-    <Layers>flood%3Aup_2025_09_10_06</Layers>
+    <Layers>flood%3Aup_2026_21_07_18</Layers>
     <SRS>EPSG%3A4326</SRS>
     <ImageFormat>image%2Fpng</ImageFormat>
     <Transparent>TRUE</Transparent>
     <BBoxOrder>xyXY</BBoxOrder>
   </Service>
   <DataWindow>
-    <UpperLeftX>77.0</UpperLeftX>
-    <UpperLeftY>30.5</UpperLeftY>
-    <LowerRightX>84.7</LowerRightX>
-    <LowerRightY>23.8</LowerRightY>
+    <UpperLeftX>77.03</UpperLeftX>
+    <UpperLeftY>30.41</UpperLeftY>
+    <LowerRightX>84.64</LowerRightX>
+    <LowerRightY>23.87</LowerRightY>
     <SizeX>1073741824</SizeX>
-    <SizeY>934294833</SizeY>
+    <SizeY>922768926</SizeY>
   </DataWindow>
   <BandsCount>4</BandsCount>
-  <BlockSizeX>1024</BlockSizeX>
-  <BlockSizeY>1024</BlockSizeY>
+  <BlockSizeX>512</BlockSizeX>
+  <BlockSizeY>512</BlockSizeY>
   <OverviewCount>20</OverviewCount>
 </GDAL_WMS>
