@@ -212,5 +212,5 @@ for csv in csvs:
     df['month'] = month
     dfs.append(df)
 
-idea_frm_tenders_df = pd.concat(dfs)
+idea_frm_tenders_df = pd.concat(dfs,ignore_index=True)
 idea_frm_tenders_df.to_csv(data_path+'flood_tenders_all.csv', index=False)

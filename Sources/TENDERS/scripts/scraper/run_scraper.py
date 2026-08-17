@@ -2,17 +2,13 @@ import subprocess
 import os
 from datetime import date, timedelta
 
-
 cwd = os.getcwd()
-script_path = cwd + "/Sources/TENDERS/scripts/scraper/scraper_up_recent_tenders_tender_status.py"
+script_path = cwd+ '/Sources/TENDERS/scripts/scraper/scraper_odisha_recent_tenders_tender_status.py'
 
-# OCT - Dec 2025
-
-subprocess.call(["/Users/stephensmathew/anaconda3/envs/tenderenv/bin/python", 
-                    script_path, "2025","6"])
-
-# Jan - April 2026
-#for month in range(1, 5):
-    #subprocess.call(["/Users/stephensmathew/anaconda3/envs/tenderenv/bin/python", 
-                  # script_path, "2026", str(month)])
+for year in range(2023,2024):
+    year = str(year)
+    for month in range(10,13):        
+        month=str(month)
+        print(year+'_'+month)
+        subprocess.call([r"/opt/anaconda3/bin/python3", script_path, year, month])
 

@@ -9,11 +9,11 @@ import sys
 #path = os.getcwd()+'/flood-data-ecosystem-UP/Sources/WORLDPOP/'
 
 year = "2020"#sys.argv[1]
-tehsil_gdf = gpd.read_file(r'D:\CDL\flood-data-ecosystem-UP\Maps\up_ids-drr_shapefiles\UP_Subdistrict_final_modified.geojson')#os.getcwd()+'/flood-data-ecosystem-Himachal-Pradesh/Maps/BharatMaps_HP_district.geojson')
+tehsil_gdf = gpd.read_file('D:\CDL\flood-data-ecosystem-UP\Maps\up_ids-drr_shapefiles\UP_Subdistrict_final_modified.geojson')#os.getcwd()+'/flood-data-ecosystem-Himachal-Pradesh/Maps/BharatMaps_HP_district.geojson')
 print(tehsil_gdf.crs)
 # TOTAL POPULATION IN EACH TEHSIL
 # worldpop_raster = rasterio.open(path+'/data/population_counts/odisha_ppp_{}.tif'.format(year))
-worldpop_raster = rasterio.open(R"D:\CDL\flood-data-ecosystem-UP\Sources\WORLDPOP\data\population_counts\UP_ppp_2020.tif")#UNadj
+worldpop_raster = rasterio.open("\CDL\flood-data-ecosystem-UP\Sources\WORLDPOP\data\population_counts\UP_ppp_2020.tif")#UNadj
 worldpop_raster_array = worldpop_raster.read(1)
 
 sum_dicts = rasterstats.zonal_stats(tehsil_gdf.to_crs(worldpop_raster.crs),

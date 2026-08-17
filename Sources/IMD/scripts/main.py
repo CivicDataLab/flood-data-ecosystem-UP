@@ -158,10 +158,7 @@ def retrieve_subdistrict_data(year: int):
     Retrives subdistrict data from the year wise .tif file
     """
     for month in [
-        "01",
-        "02",
-        "03",
-        "04"
+        "06","07"
     ]:
         month_and_year_filename = "{}_{}".format(str(year), str(month))
         try:
@@ -215,8 +212,8 @@ if __name__ == "__main__":
         end_date = input("Enter end date (YYYY-MM-DD): ")
     else:
         # For historical years, these will be ignored by the functions
-        start_date = f"{year}-01-01"
-        end_date = f"{year}-04-30"
+        start_date = f"{year}-07-01"
+        end_date = f"{year}-07-31"
 
 
     download_data(year, start_date=start_date, end_date=end_date)
