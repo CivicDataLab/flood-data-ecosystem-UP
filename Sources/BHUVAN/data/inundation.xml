@@ -2,7 +2,7 @@
   <Service name="WMS">
     <Version>1.1.1</Version>
     <ServerUrl>https://bhuvan-gp1.nrsc.gov.in/bhuvan/wms?&amp;SERVICE=WMS</ServerUrl>
-    <Layers>flood%3Aup_2026_21_07_18</Layers>
+    <Layers>flood%3Aup_2026_05_08_06</Layers>
     <SRS>EPSG%3A4326</SRS>
     <ImageFormat>image%2Fpng</ImageFormat>
     <Transparent>TRUE</Transparent>

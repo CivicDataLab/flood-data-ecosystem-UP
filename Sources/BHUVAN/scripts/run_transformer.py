@@ -13,7 +13,7 @@ for year in [2026]:
     print(f"\nYear: {year}")
     year = str(year)
 
-    for month in ["07"]:
+    for month in ["08"]:
 
         # Pattern: YYYY_DD_MM_HH → e.g. 2025_31_08_18_watermarkremoved.tif
         files = glob.glob(
