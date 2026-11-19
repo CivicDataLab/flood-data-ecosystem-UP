@@ -1,12 +1,15 @@
 import os
 import subprocess
+import time
 import timeit
+import socket
 
+import numpy as np
+import rasterio
 from osgeo import gdal
 
 gdal.DontUseExceptions()
 
-# Make GDAL retry flaky/truncated downloads instead of silently giving up per-tile
 os.environ["GDAL_HTTP_TIMEOUT"] = "120"
 os.environ["GDAL_HTTP_CONNECTTIMEOUT"] = "30"
 os.environ["GDAL_HTTP_MAX_RETRY"] = "5"
@@ -33,10 +36,29 @@ height_px = round(bbox_h / abs(target_resolution_y))
 url_as = "https://bhuvan-gp1.nrsc.gov.in/bhuvan/wms"
 
 date_strings = [
-    "2026_21_07_18"
+   "2026_12_10_18",
+    "2026_11_10_06",
+    "2026_10_10_06",
+    "2026_06_10_18",
+    "2026_03_10_10",
+    "2026_02_10_18",
+    "2026_03_10_06",
+    "2026_01_10_18"
 ]
 
-for dates in date_strings:
+
+def host_reachable(hostname, retries=3, delay=5):
+    for attempt in range(retries):
+        try:
+            socket.gethostbyname(hostname)
+            return True
+        except socket.gaierror:
+            print(f"DNS lookup failed for {hostname}, retry {attempt + 1}/{retries}...")
+            time.sleep(delay)
+    return False
+
+
+def fetch_and_warp(dates, attempt_label=""):
     input_xml_path = path + "/data/inundation.xml"
     output_tiff_path = path + f"/data/tiffs/{dates}.tif"
 
@@ -49,22 +71,19 @@ for dates in date_strings:
     ]
 
     result = subprocess.run(command, capture_output=True, text=True)
-
     xml_content = open(input_xml_path).read()
     if result.returncode != 0 or "ServiceException" in xml_content:
-        print(f"WMS fetch failed for {dates}")
-        print("stderr:", result.stderr)
-        print("xml:", xml_content[:500])
-        continue
+        print(f"{attempt_label}WMS fetch failed for {dates}")
+        print("  stderr:", result.stderr)
+        print("  xml:", xml_content[:300])
+        return False
 
-    # Shrink the block size so each individual HTTP tile request is smaller
-    # and less likely to time out / get truncated on a slow server.
     xml_content = xml_content.replace("<BlockSizeX>1024</BlockSizeX>", "<BlockSizeX>512</BlockSizeX>")
     xml_content = xml_content.replace("<BlockSizeY>1024</BlockSizeY>", "<BlockSizeY>512</BlockSizeY>")
     with open(input_xml_path, "w") as f:
         f.write(xml_content)
 
-    print("Warping Started")
+    print(f"{attempt_label}Warping {dates} ...")
     starttime = timeit.default_timer()
 
     gdal.Warp(
@@ -77,5 +96,41 @@ for dates in date_strings:
         callback=gdal.TermProgress,
     )
 
-    print("Time took to Warp: ", timeit.default_timer() - starttime)
-    print(f"Warping completed. Output saved to: {output_tiff_path}")
+    print(f"  Time taken: {timeit.default_timer() - starttime:.1f}s")
+
+    # Post-warp sanity check: gdal.Warp doesn't raise on failed/blank tiles
+    with rasterio.open(output_tiff_path) as chk:
+        band4 = chk.read(4)
+        nonzero = np.count_nonzero(band4)
+        if nonzero == 0:
+            print(f"  WARNING: {dates}.tif came back completely empty")
+            return False
+        print(f"  OK: {dates}.tif has {nonzero} nonzero alpha pixels")
+    return True
+
+
+if not host_reachable(url_as.split("/")[2]):
+    print("Host unreachable — check your network/VPN before proceeding.")
+    raise SystemExit(1)
+
+failed_dates = []
+
+for dates in date_strings:
+    success = fetch_and_warp(dates)
+    if not success:
+        print(f"Retrying {dates} once after a short pause...")
+        time.sleep(10)
+        success = fetch_and_warp(dates, attempt_label="[retry] ")
+    if not success:
+        failed_dates.append(dates)
+
+    # Small pause between requests so we don't hammer a slow/flaky govt server
+    time.sleep(2)
+
+print("\n=== Run complete ===")
+if failed_dates:
+    print(f"{len(failed_dates)} date(s) still failed after retry:")
+    for d in failed_dates:
+        print(" -", d)
+else:
+    print("All dates fetched successfully.")

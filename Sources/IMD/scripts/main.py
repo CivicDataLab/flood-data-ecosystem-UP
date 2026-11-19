@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from datetime import datetime
 import geopandas as gpd
 import imdlib as imd
@@ -7,6 +8,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import rasterstats
+import requests
 from rasterio.crs import CRS
 from rasterio.transform import Affine
 
@@ -27,12 +29,25 @@ def download_data(year: int, start_date: str, end_date: str):
     """
     current_year = datetime.now().year
     if year == current_year:
-        imd.get_real_data(
-            var_type="rain",
-            start_dy=start_date,
-            end_dy=end_date,
-            file_dir=DATA_FOLDER,
-        )
+        max_attempts = 3
+        for attempt in range(1, max_attempts + 1):
+            try:
+                imd.get_real_data(
+                    var_type="rain",
+                    start_dy=start_date,
+                    end_dy=end_date,
+                    file_dir=DATA_FOLDER,
+                )
+                break
+            except requests.exceptions.ConnectionError as e:
+                if attempt == max_attempts:
+                    raise
+                wait = 30 * attempt
+                print(
+                    f"Connection to IMD failed (attempt {attempt}/{max_attempts}): {e}\n"
+                    f"Retrying in {wait}s..."
+                )
+                time.sleep(wait)
     else:
         imd.get_data(
             var_type="rain",
@@ -158,7 +173,7 @@ def retrieve_subdistrict_data(year: int):
     Retrives subdistrict data from the year wise .tif file
     """
     for month in [
-        "06","07"
+       "10"
     ]:
         month_and_year_filename = "{}_{}".format(str(year), str(month))
         try:
@@ -212,8 +227,8 @@ if __name__ == "__main__":
         end_date = input("Enter end date (YYYY-MM-DD): ")
     else:
         # For historical years, these will be ignored by the functions
-        start_date = f"{year}-07-01"
-        end_date = f"{year}-07-31"
+        start_date = f"{year}-10-01"
+        end_date = f"{year}-10-30"
 
 
     download_data(year, start_date=start_date, end_date=end_date)

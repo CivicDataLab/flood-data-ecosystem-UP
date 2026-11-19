@@ -94,7 +94,8 @@ class SeleniumScrappingUtils(object):
         combines all the csvs
         '''
         extension = 'csv'
-        all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
+        # skip empty CSVs (e.g. left over from an interrupted run) - pd.read_csv raises EmptyDataError on them
+        all_filenames = [i for i in glob.glob('*.{}'.format(extension)) if os.path.getsize(i) > 0]
         combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames ], axis = 1)
         combined_csv['Tender Stage'] = tender_status
         combined_csv.to_csv(path_to_save + name_of_file+".csv", index=False, encoding='utf-8-sig')
